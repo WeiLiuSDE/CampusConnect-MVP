@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusConnect — BTU Student Portal</title>
+<style>
+  :root{
+    --navy:#131F53; --navy2:#1E2F7A; --indigo:#3B4CCA;
+    --gold:#F5B301; --gold-soft:#FFE9AE;
+    --sky:#EAF1FF; --bg:#F4F7FE; --white:#fff;
+    --ink:#1A2038; --muted:#6B7394;
+    --ok:#0F8A57; --ok-bg:#E3F6ED; --err:#C93B34; --err-bg:#FCEBEA;
+    --r-lg:20px; --r-md:14px;
+    --shadow:0 6px 24px rgba(19,31,83,.08);
+    --shadow-lg:0 16px 44px rgba(19,31,83,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100vh;
+  }
+  body::before{ /* soft campus-sky wash behind everything */
+    content:""; position:fixed; inset:0; z-index:-1;
+    background:
+      radial-gradient(600px 320px at 12% -5%, rgba(59,76,202,.10), transparent 70%),
+      radial-gradient(520px 300px at 95% 8%, rgba(245,179,1,.12), transparent 70%),
+      var(--bg);
+  }
+
+  /* ---------- header ---------- */
+  header{
+    background:linear-gradient(100deg,var(--navy) 0%,var(--navy2) 55%,var(--indigo) 130%);
+    color:#fff; padding:14px 26px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .mark{
+    width:38px;height:38px;border-radius:12px;background:var(--gold);
+    display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,.25);
+  }
+  .brand .mark svg{width:24px;height:24px;fill:var(--navy)}
+  .brand .name{font-size:1.28rem;font-weight:800;letter-spacing:.2px}
+  .brand .name b{color:var(--gold);font-weight:800}
+  .brand small{display:block;font-size:.66rem;letter-spacing:2.4px;color:#B9C4F2;font-weight:600;text-transform:uppercase}
+  header .user{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:.88rem}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--navy);font-weight:800;display:grid;place-items:center;font-size:.85rem}
+  header button.out{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 15px;border-radius:99px;font-weight:600;cursor:pointer;font-size:.82rem;transition:.2s}
+  header button.out:hover{background:rgba(255,255,255,.26)}
+
+  /* ---------- nav ---------- */
+  nav{
+    position:sticky;top:0;z-index:20;display:flex;gap:6px;padding:10px 20px;overflow-x:auto;
+    background:rgba(255,255,255,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 1px 0 rgba(19,31,83,.08);
+  }
+  nav button{
+    display:flex;align-items:center;gap:8px;background:none;border:0;cursor:pointer;white-space:nowrap;
+    padding:10px 18px;border-radius:99px;font-size:.92rem;font-weight:650;color:var(--muted);transition:.2s;
+    font-family:inherit;
+  }
+  nav button svg{width:17px;height:17px;fill:currentColor;flex:0 0 auto}
+  nav button:hover{background:var(--sky);color:var(--navy)}
+  nav button.active{background:var(--navy);color:#fff;box-shadow:0 4px 14px rgba(19,31,83,.28)}
+
+  main{max-width:1020px;margin:28px auto;padding:0 20px}
+  .card{background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow);padding:26px;margin-bottom:20px}
+  h1{font-size:1.5rem;color:var(--navy);letter-spacing:-.2px}
+  h2{font-size:1.06rem;color:var(--navy);margin-bottom:14px}
+  .sub{color:var(--muted);font-size:.9rem;margin-top:5px;line-height:1.5}
+
+  /* ---------- login ---------- */
+  #view-login{min-height:100vh;display:grid;place-items:center;padding:30px 18px;position:relative;overflow:hidden;
+    background:linear-gradient(180deg,#1B2B6B 0%,#2E3F97 42%,#7B6BD6 72%,#E8A54B 100%);}
+  #view-login .campus{position:absolute;left:0;right:0;bottom:0;width:100%;pointer-events:none}
+  .login-card{
+    position:relative;z-index:2;width:min(430px,100%);background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+    border-radius:24px;box-shadow:var(--shadow-lg);padding:34px 32px;
+  }
+  .login-card .crest{width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,var(--gold),#FFCF4D);display:grid;place-items:center;margin:0 auto 14px;box-shadow:0 8px 20px rgba(245,179,1,.45)}
+  .login-card .crest svg{width:34px;height:34px;fill:var(--navy)}
+  .login-card h1{text-align:center;font-size:1.45rem}
+  .login-card .tag{text-align:center;color:var(--muted);font-size:.86rem;margin:6px 0 20px}
+  label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin:14px 0 6px;color:var(--navy)}
+  input,select{width:100%;padding:12px 14px;border:1.6px solid #DCE3F5;border-radius:12px;font-size:.95rem;background:#fff;font-family:inherit;transition:.2s}
+  input:focus,select:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 4px rgba(59,76,202,.13)}
+  .btn{
+    background:linear-gradient(120deg,var(--navy),var(--indigo));color:#fff;border:0;padding:13px 22px;border-radius:12px;
+    font-size:.96rem;font-weight:700;cursor:pointer;margin-top:18px;font-family:inherit;transition:.2s;
+    box-shadow:0 8px 18px rgba(30,47,122,.30);
+  }
+  .btn:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(30,47,122,.36)}
+  .btn.small{padding:8px 16px;font-size:.83rem;margin-top:0;border-radius:10px;box-shadow:none}
+  .btn.ghost{background:var(--sky);color:var(--navy);box-shadow:none}
+  .btn.ghost:hover{background:#DDE8FF;transform:none}
+  .btn.cancel{background:#fff;border:1.6px solid var(--err);color:var(--err);box-shadow:none}
+  .btn.cancel:hover{background:var(--err-bg);transform:none;box-shadow:none}
+  .regbadge{display:inline-flex;align-items:center;gap:6px;background:var(--ok-bg);color:var(--ok);
+    font-size:.85rem;font-weight:800;border-radius:99px;padding:9px 18px;margin-right:10px;vertical-align:middle}
+  .cat.reg{background:var(--ok-bg);color:var(--ok);margin-left:6px}
+  .demo-hint{margin-top:14px;text-align:center;font-size:.76rem;color:var(--muted);background:var(--sky);border-radius:10px;padding:9px 12px}
+  .msg{padding:11px 14px;border-radius:12px;font-size:.88rem;margin-top:14px;display:none}
+  .msg.err{background:var(--err-bg);color:var(--err);display:block}
+  .msg.ok{background:var(--ok-bg);color:var(--ok);display:block}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;border-radius:24px;overflow:hidden;color:#fff;margin-bottom:20px;
+    background:linear-gradient(115deg,#16255F 0%,#2C3D8F 55%,#5A55C4 100%);
+    box-shadow:var(--shadow-lg);
+  }
+  .hero .inner{position:relative;z-index:2;padding:34px 32px 90px}
+  .hero h1{color:#fff;font-size:1.65rem}
+  .hero p{color:#C9D3F7;font-size:.93rem;margin-top:6px;max-width:520px;line-height:1.55}
+  .hero svg.skyline{position:absolute;bottom:-2px;left:0;width:100%;pointer-events:none}
+  .stats{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
+  .stat{
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(6px);
+    border-radius:16px;padding:12px 20px;min-width:130px;cursor:pointer;transition:.2s;
+  }
+  .stat:hover,.stat:focus-visible{
+    background:rgba(255,255,255,.24);border-color:var(--gold);transform:translateY(-3px);
+    box-shadow:0 10px 24px rgba(0,0,0,.22);outline:none;
+  }
+  .stat b{font-size:1.45rem;display:block;color:var(--gold)}
+  .stat span{font-size:.68rem;letter-spacing:1.4px;color:#C9D3F7;font-weight:600}
+
+  .quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+  @media(min-width:760px){.quick{grid-template-columns:repeat(3,1fr)}}
+  .quick a{
+    display:flex;align-items:center;gap:14px;background:#fff;border-radius:var(--r-md);box-shadow:var(--shadow);
+    padding:18px;cursor:pointer;text-decoration:none;color:var(--ink);transition:.2s;border:1.6px solid transparent;
+  }
+  .quick a:hover{transform:translateY(-3px);border-color:var(--indigo);box-shadow:var(--shadow-lg)}
+  .quick .qicon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:1.3rem;flex:0 0 auto}
+  .quick b{display:block;font-size:.95rem;color:var(--navy)}
+  .quick span{font-size:.78rem;color:var(--muted)}
+
+  /* ---------- events ---------- */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 20px}
+  .toolbar input,.toolbar select{width:auto;flex:1;min-width:170px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:16px}
+  .event{
+    background:#fff;border:1.6px solid #E7ECFA;border-radius:var(--r-md);padding:18px;display:flex;flex-direction:column;gap:9px;
+    transition:.2s;
+  }
+  .event:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:#C9D4F5}
+  .event .top{display:flex;align-items:flex-start;gap:12px}
+  .datebox{
+    flex:0 0 auto;width:52px;border-radius:12px;background:var(--sky);text-align:center;padding:7px 0 8px;
+  }
+  .datebox b{display:block;font-size:1.15rem;color:var(--navy);line-height:1.1}
+  .datebox span{font-size:.62rem;letter-spacing:1.5px;font-weight:700;color:var(--indigo)}
+  .event h3{font-size:1rem;color:var(--navy);line-height:1.3}
+  .cat{align-self:flex-start;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:4px 11px;border-radius:99px}
+  .cat.Career{background:#FFF2CE;color:#8A6400}
+  .cat.Academic{background:#E3E9FF;color:#2A3BAF}
+  .cat.Social{background:#FCE7F1;color:#B02A6C}
+  .cat.Wellness{background:#E1F5EA;color:#0F7A4D}
+  .event .meta{font-size:.8rem;color:var(--muted);line-height:1.5}
+  .event{cursor:pointer}
+  .event .more{margin-top:auto;font-size:.78rem;font-weight:700;color:var(--indigo)}
+
+  /* ---------- event detail ---------- */
+  .backbtn{
+    display:inline-flex;align-items:center;gap:7px;background:#fff;border:1.6px solid #D9E2F8;color:var(--navy);
+    border-radius:99px;padding:8px 18px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;
+    margin-bottom:16px;transition:.2s;
+  }
+  .backbtn:hover{background:var(--sky);border-color:var(--indigo)}
+  .detail-hero{position:relative;border-radius:24px;overflow:hidden;color:#fff;padding:38px 32px;box-shadow:var(--shadow-lg);margin-bottom:20px}
+  .detail-hero .emoji{font-size:2.6rem;display:block;margin-bottom:10px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))}
+  .detail-hero h1{color:#fff;font-size:1.7rem;position:relative;z-index:2}
+  .detail-hero .deco{position:absolute;right:-30px;top:-30px;width:230px;height:230px;border-radius:50%;background:rgba(255,255,255,.12)}
+  .detail-hero .deco2{position:absolute;right:90px;bottom:-60px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.09)}
+  .chips2{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px;position:relative;z-index:2}
+  .chips2 span{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(4px);
+    border-radius:99px;padding:6px 15px;font-size:.8rem;font-weight:600}
+  .hl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:6px}
+  .hl{display:flex;gap:11px;align-items:flex-start;background:var(--sky);border-radius:var(--r-md);padding:14px}
+  .hl .ic{font-size:1.15rem;flex:0 0 auto}
+  .hl div b{display:block;font-size:.87rem;color:var(--navy)}
+  .hl div span{font-size:.78rem;color:var(--muted);line-height:1.5}
+  .co-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px;margin-top:6px}
+  .co{display:flex;gap:12px;align-items:center;border:1.6px solid #E7ECFA;border-radius:var(--r-md);padding:13px 15px;transition:.2s}
+  .co:hover{border-color:#C9D4F5;box-shadow:var(--shadow)}
+  .co .logo{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:.95rem;flex:0 0 auto;letter-spacing:.5px}
+  .co b{display:block;font-size:.88rem;color:var(--navy)}
+  .co span{font-size:.74rem;color:var(--muted);line-height:1.4}
+  .about p{font-size:.92rem;line-height:1.7;color:var(--ink);margin-bottom:10px}
+
+  /* ---------- class registration ---------- */
+  .courses{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:16px}
+  .course{
+    background:#fff;border:1.6px solid #E7ECFA;border-radius:var(--r-md);padding:18px;display:flex;flex-direction:column;gap:9px;transition:.2s;
+  }
+  .course:hover{border-color:#C9D4F5;box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+  .course .top2{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .ccode{font-size:.72rem;font-weight:800;letter-spacing:1px;color:var(--indigo);background:var(--sky);padding:4px 11px;border-radius:99px;white-space:nowrap}
+  .course h3{font-size:1rem;color:var(--navy);line-height:1.3}
+  .cmeta{font-size:.78rem;color:var(--muted);line-height:1.6}
+  .cdesc{font-size:.84rem;color:var(--ink);line-height:1.55}
+  .pill{font-size:.7rem;font-weight:800;letter-spacing:.6px;padding:4px 11px;border-radius:99px;text-transform:uppercase;white-space:nowrap}
+  .pill.open{background:var(--ok-bg);color:var(--ok)}
+  .pill.full{background:var(--err-bg);color:var(--err)}
+  .pill.wait{background:#FFF2CE;color:#8A6400}
+  .seats{display:flex;align-items:center;justify-content:space-between;font-size:.72rem;color:var(--muted)}
+  .seatbar{height:6px;border-radius:99px;background:#EDF0FA;overflow:hidden}
+  .seatbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--indigo),var(--navy))}
+  .seatbar i.hot{background:linear-gradient(90deg,#E08900,var(--err))}
+  .course .foot,.club .foot{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:6px}
+  table{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:8px}
+  th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #EDF0FA}
+  th{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:1px}
+
+  /* ---------- club directory ---------- */
+  .clubs{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:14px;margin-top:16px}
+  .club{
+    background:#fff;border:1.6px solid #E7ECFA;border-radius:var(--r-md);padding:18px;display:flex;flex-direction:column;gap:9px;transition:.2s;
+  }
+  .club:hover{border-color:#C9D4F5;box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+  .club .head{display:flex;gap:12px;align-items:center}
+  .club .cicon{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:1.35rem;flex:0 0 auto}
+  .club h3{font-size:.98rem;color:var(--navy);line-height:1.3}
+  .cat.Cultural{background:#FFF2CE;color:#8A6400}
+  .cat.Arts{background:#F3E8FF;color:#7C3AED}
+  .cat.Athletic{background:#FFE4E0;color:#C93B34}
+  .cat.Service{background:#E1F5EA;color:#0F7A4D}
+  .cat.Hobby{background:#E0F2FE;color:#0369A1}
+
+  /* ---------- career services (job board) ---------- */
+  .jobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:16px}
+  .job{
+    background:#fff;border:1.6px solid #E7ECFA;border-radius:var(--r-md);padding:18px;display:flex;flex-direction:column;gap:9px;transition:.2s;
+  }
+  .job:hover{border-color:#C9D4F5;box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+  .job .head{display:flex;gap:12px;align-items:center}
+  .jlogo{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:.95rem;letter-spacing:.5px;flex:0 0 auto}
+  .job h3{font-size:.98rem;color:var(--navy);line-height:1.3}
+  .jco{font-size:.8rem;color:var(--muted);font-weight:600}
+  .jmeta{font-size:.78rem;color:var(--muted);line-height:1.6}
+  .jdesc{font-size:.84rem;color:var(--ink);line-height:1.55}
+  .job .foot{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:6px}
+
+  /* ---------- appointments ---------- */
+  .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:16px}
+  .slot{
+    background:#fff;border:1.6px solid #E7ECFA;border-radius:var(--r-md);padding:16px;display:flex;flex-direction:column;gap:8px;transition:.2s;
+  }
+  .slot:hover{border-color:#C9D4F5;box-shadow:var(--shadow)}
+  .slot .who{font-weight:700;color:var(--navy);font-size:.93rem}
+  .slot .when{font-size:.82rem;color:var(--muted)}
+  .slot .row{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+  .pill.booked{background:var(--err-bg);color:var(--err)}
+  .pill.type-Advising{background:#E3E9FF;color:#2A3BAF}
+  .pill.type-Career{background:#FFF2CE;color:#8A6400}
+
+  /* ---------- assistant ---------- */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 6px}
+  .chips button{
+    background:#fff;border:1.6px solid #D9E2F8;color:var(--navy);border-radius:99px;padding:7px 15px;font-size:.8rem;
+    font-weight:600;cursor:pointer;font-family:inherit;transition:.2s;
+  }
+  .chips button:hover{background:var(--sky);border-color:var(--indigo)}
+  .chat{display:flex;flex-direction:column;height:440px;margin-top:8px}
+  .chatlog{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:10px 4px 16px}
+  .msgrow{display:flex;gap:10px;align-items:flex-end}
+  .msgrow.user{flex-direction:row-reverse}
+  .botface{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#FFCF4D);display:grid;place-items:center;flex:0 0 auto}
+  .botface svg{width:19px;height:19px;fill:var(--navy)}
+  .bubble{max-width:76%;padding:12px 16px;border-radius:18px;font-size:.9rem;line-height:1.5}
+  .bubble.user{background:linear-gradient(120deg,var(--navy),var(--indigo));color:#fff;border-bottom-right-radius:5px}
+  .bubble.bot{background:var(--sky);color:var(--ink);border-bottom-left-radius:5px}
+  .bubble.bot .src{display:block;margin-top:7px;font-size:.7rem;color:var(--indigo);font-weight:600}
+  .typing{display:inline-flex;gap:4px;padding:6px 2px}
+  .typing i{width:7px;height:7px;border-radius:50%;background:#9AA7D6;animation:blink 1.2s infinite}
+  .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+  .chatrow{display:flex;gap:10px;padding-top:10px;border-top:1px solid #EDF0FA}
+
+
+  /* ---------- card grids: keep every action button on the same baseline ---------- */
+  .courses,.clubs,.jobs,.grid{align-items:stretch}
+  .ccard,.club,.job,.event{height:100%}
+  /* titles reserve two lines so the rows beneath them line up card to card */
+  .ccard h3,.club h3,.job h3,.event h3{line-height:1.3;min-height:2.6em;display:flex;align-items:flex-start}
+  /* the description absorbs any leftover space, pushing the action to the bottom */
+  .cdesc2,.club .cdesc,.jdesc{flex:1 1 auto}
+  .event .meta:last-of-type{flex:1 1 auto}
+  /* actions pinned to the bottom edge of every card */
+  .ccard > .btn.block{margin-top:auto}
+  .club .foot,.job .foot{margin-top:auto;padding-top:6px}
+  /* info boxes align across cards even when one schedule wraps to three lines */
+  .iboxes{align-items:stretch}
+  .ibox{display:flex;flex-direction:column;justify-content:flex-start}
+  /* KPI tiles (executive, budget, security): bars share one baseline */
+  .dstats{align-items:stretch}
+  .dstat{display:flex;flex-direction:column;height:100%}
+  .dstat .dsub{flex:1 1 auto}
+  .dstat .kpibar{margin-top:auto}
+  /* IT pipeline steps and role checklists stay equal height */
+  .pipe{align-items:stretch}
+  .pipestep{display:flex;flex-direction:column;height:100%}
+  @media(max-width:520px){ .ccard h3,.club h3,.job h3,.event h3{min-height:0} }
+  .hidden{display:none!important}
+  footer{text-align:center;color:var(--muted);font-size:.75rem;padding:26px 16px;line-height:1.7}
+  section{animation:fadein .35s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media(max-width:520px){ .bubble{max-width:92%} .hero .inner{padding:26px 22px 80px} main{margin-top:16px} }
+
+  /* ===== v3 shell: sidebar + topbar + dashboard ===== */
+  :root{--teal:#0E7C6B;--okdark:#0E8A5F}
+  #appShell{display:flex;min-height:100vh;align-items:stretch}
+  .sidebar{width:252px;flex:0 0 252px;background:linear-gradient(180deg,#0D1B41 0%,#13295C 100%);color:#fff;padding:22px 16px;display:flex;flex-direction:column;gap:8px}
+  .sblogo{display:flex;gap:11px;align-items:center;padding:6px 8px}
+  .sblogo .smark{width:42px;height:42px;border-radius:13px;background:var(--gold);color:#132349;display:grid;place-items:center;font-weight:800;font-size:.95rem;flex:0 0 auto}
+  .sblogo b{font-size:1.02rem} .sblogo small{display:block;font-size:.66rem;color:#93A3CF;margin-top:2px}
+  .snav{display:flex;flex-direction:column;gap:5px;margin-top:26px}
+  .snav button{display:flex;align-items:center;gap:12px;background:none;border:0;color:#93A3CF;padding:13px 14px;border-radius:12px;font-weight:650;font-size:.93rem;cursor:pointer;text-align:left;font-family:inherit;transition:.2s;width:100%}
+  .snav button::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.45;flex:0 0 auto}
+  .snav button:hover{color:#fff;background:rgba(255,255,255,.06)}
+  .snav button.active{background:rgba(255,255,255,.11);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.10)}
+  .snav button.active::before{background:var(--gold);opacity:1}
+  .sfoot{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+  .privcard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:13px 14px;font-size:.76rem;color:#AEBBDF;line-height:1.5}
+  .privcard b{color:#fff;display:block;margin-bottom:3px;font-size:.8rem}
+  .resetlink{color:#93A3CF;font-size:.78rem;background:none;border:0;cursor:pointer;padding:10px 6px;text-align:left;font-family:inherit}
+  .resetlink:hover{color:#fff}
+  .maincol{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--bg)}
+  .topbar{background:#fff;padding:15px 34px;display:flex;align-items:center;gap:16px;border-bottom:1px solid #E8ECF6;position:sticky;top:0;z-index:20}
+  .eyebrow{display:block;font-size:.67rem;font-weight:800;letter-spacing:2.2px;color:var(--teal);text-transform:uppercase}
+  .eyebrow.gold{color:var(--gold)}
+  .topbar h1{font-size:1.55rem;color:var(--ink);letter-spacing:-.3px;margin-top:2px}
+  .tright{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .tavatar{width:42px;height:42px;border-radius:50%;background:#DCEFE9;color:#0B6B52;font-weight:800;display:grid;place-items:center;font-size:.85rem}
+  .tinfo b{display:block;font-size:.9rem;color:var(--ink)} .tinfo span{font-size:.74rem;color:var(--muted)}
+  .signout{border:1.5px solid #E3E8F4;background:#fff;border-radius:12px;padding:9px 16px;font-weight:650;cursor:pointer;font-family:inherit;font-size:.85rem;color:var(--ink);transition:.2s}
+  .signout:hover{border-color:var(--indigo);color:var(--indigo)}
+  .maincol main{max-width:none;width:100%;margin:0;padding:28px 40px}
+  /* dashboard */
+  .dhero{position:relative;overflow:hidden;border-radius:22px;color:#fff;padding:46px 42px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;background:linear-gradient(112deg,#0D2143 0%,#0E4A5C 62%,#20654E 105%);box-shadow:var(--shadow-lg)}
+  .dhero::after{content:"";position:absolute;right:-70px;top:-70px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(240,180,41,.25),transparent 65%)}
+  .dhero-l{flex:1;min-width:260px;position:relative;z-index:2}
+  .dhero h1{color:#fff;font-size:clamp(1.9rem,4vw,2.9rem);letter-spacing:-.5px;margin:10px 0 12px}
+  .dhero p{color:#C4D6DF;font-size:.98rem;max-width:560px;line-height:1.6}
+  .btn.goldbtn{background:var(--gold);color:#20242F;box-shadow:0 8px 20px rgba(240,180,41,.35);position:relative;z-index:2;margin-top:0}
+  .btn.goldbtn:hover{box-shadow:0 12px 26px rgba(240,180,41,.42)}
+  .dstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:16px;margin:18px 0}
+  .dstat{background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);cursor:pointer;transition:.2s;border:1.6px solid transparent}
+  .dstat:hover{transform:translateY(-3px);border-color:#C9D4F5}
+  .dstat b{font-size:2.05rem;display:block;margin:10px 0 3px;color:var(--ink);letter-spacing:-.5px}
+  .dsub{font-size:.78rem;color:var(--muted)}
+  .dstat.status{background:#E9F5EF;cursor:default}
+  .dstat.status:hover{transform:none;border-color:transparent}
+  .dstat.status b{color:var(--okdark);font-size:1.65rem}
+  .dstat.status .eyebrow{color:#4E6E5F}
+  .dgrid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;align-items:start}
+  .dh2{font-size:1.35rem;margin:8px 0 6px;color:var(--ink)}
+  .step{display:flex;align-items:center;gap:14px;padding:15px 2px;border-bottom:1px solid #EDF0F8}
+  .step:last-child{border-bottom:0}
+  .num{width:38px;height:38px;border-radius:50%;background:#EEF2FB;color:var(--navy);font-weight:800;display:grid;place-items:center;font-size:.78rem;flex:0 0 auto}
+  .sinfo{min-width:0} .sinfo b{display:block;font-size:.95rem;color:var(--ink)} .sinfo span{font-size:.8rem;color:var(--muted)}
+  .olink{margin-left:auto;color:var(--teal);font-weight:800;cursor:pointer;font-size:.85rem;flex:0 0 auto}
+  .olink:hover{text-decoration:underline}
+  .ghelp{position:relative;overflow:hidden;background:linear-gradient(160deg,#0D1B41,#17346A);border-radius:18px;padding:28px;color:#fff}
+  .ghelp h2{color:#fff;font-size:1.55rem;margin:12px 0 10px;letter-spacing:-.3px}
+  .ghelp p{color:#AEBBDF;font-size:.88rem;line-height:1.65;margin-bottom:18px;position:relative;z-index:2}
+  .btn.whitebtn{background:#fff;color:#132349;box-shadow:none;margin-top:0;position:relative;z-index:2}
+  .qmark{position:absolute;right:2px;bottom:-58px;font-size:12rem;font-weight:800;color:rgba(255,255,255,.05);line-height:1;pointer-events:none}
+  @media(max-width:920px){
+    #appShell{flex-direction:column}
+    .sidebar{width:100%;flex:none;padding:14px}
+    .snav{flex-direction:row;overflow-x:auto;margin-top:12px;gap:4px;padding-bottom:4px}
+    .snav button{padding:9px 13px;white-space:nowrap}
+    .snav button::before{display:none}
+    .sfoot{display:none}
+    .topbar{padding:14px 18px}
+    .maincol main{padding:18px 16px}
+    .dgrid{grid-template-columns:1fr}
+    .dhero{padding:30px 24px}
+  }
+
+  /* ===== v4 professional restyle ===== */
+  .phero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:4px 0 22px;flex-wrap:wrap}
+  .phero h1{font-size:clamp(1.8rem,3.4vw,2.5rem);color:var(--ink);letter-spacing:-.6px;margin:8px 0;line-height:1.12}
+  .psub{color:var(--muted);font-size:.95rem;max-width:660px;line-height:1.55}
+  .selpill{background:#DCEFE9;color:#0B6B52;font-weight:700;font-size:.85rem;border-radius:99px;padding:10px 18px;white-space:nowrap}
+  .flabel{display:block;font-size:.66rem;font-weight:800;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+  .btn{background:var(--teal);box-shadow:0 6px 16px rgba(14,124,107,.22)}
+  .btn:hover{box-shadow:0 10px 22px rgba(14,124,107,.30)}
+  .btn.block{width:100%;margin-top:8px;padding:14px}
+  .btn.soft{background:#DCEFE9;color:#0B6B52;box-shadow:none}
+  .btn.soft:hover{background:#CBE7DE;box-shadow:none;transform:none}
+  .btn.wl{background:#FFF2CE;color:#8A6400;box-shadow:none}
+  .btn.wl:hover{background:#FBE9B6;box-shadow:none;transform:none}
+  /* course cards */
+  .ccard{background:#fff;border:1.6px solid #E7ECFA;border-radius:var(--r-md);padding:22px;display:flex;flex-direction:column;gap:10px;position:relative;transition:.2s;overflow:hidden}
+  .ccard:hover{border-color:#C9D4F5;box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+  .codetag{position:absolute;top:0;right:0;background:#13234B;color:#fff;font-weight:800;font-size:.76rem;padding:10px 18px;border-radius:0 12px 0 14px;letter-spacing:.5px}
+  .cdept{font-size:.64rem;font-weight:800;letter-spacing:2px;color:var(--teal);text-transform:uppercase;margin-top:4px}
+  .ccard h3{font-size:1.22rem;color:var(--ink);letter-spacing:-.3px;padding-right:70px}
+  .cinst{color:var(--muted);font-size:.85rem}
+  .iboxes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px}
+  .ibox{background:#F5F7FB;border-radius:12px;padding:12px 14px}
+  .ibox span{display:block;font-size:.6rem;font-weight:800;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+  .ibox b{font-size:.86rem;color:var(--ink)}
+  .cdesc2{font-size:.84rem;color:var(--muted);line-height:1.55}
+  /* appointments */
+  .confbox{background:#E9F5EF;border:1px solid #CBE7DA;border-radius:16px;padding:20px 22px;margin-bottom:16px}
+  .confbox .eyebrow{color:#0B6B52}
+  .confrow{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid #D8ECE1}
+  .confrow:last-child{border-bottom:0}
+  .ckmark{width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-size:.85rem;flex:0 0 auto}
+  .confrow b{display:block;font-size:.95rem;color:var(--ink)} .confrow span{font-size:.8rem;color:var(--muted)}
+  .cancel-link{margin-left:auto;color:#0B6B52;font-weight:700;cursor:pointer;font-size:.85rem}
+  .cancel-link:hover{text-decoration:underline}
+  .arow{display:flex;align-items:center;gap:16px;padding:15px 2px;border-bottom:1px solid #EDF0F8;flex-wrap:wrap}
+  .arow:last-child{border-bottom:0}
+  .ainfo{min-width:180px} .ainfo b{display:block;font-size:.95rem;color:var(--ink)} .ainfo span{font-size:.8rem;color:var(--muted)}
+  .awhen{color:var(--muted);font-size:.88rem;flex:1;text-align:center;min-width:150px}
+  .bookedpill{background:#DCEFE9;color:#0B6B52;font-weight:700;border-radius:12px;padding:10px 22px;font-size:.85rem}
+  /* assistant */
+  .astatus{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:14px 20px;display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:.88rem;flex-wrap:wrap}
+  .dot{width:10px;height:10px;border-radius:50%;background:#18A567;flex:0 0 auto}
+  .dot.off{background:#D64545}
+  .astatus b{color:var(--ink)} .astatus span{color:var(--muted)}
+  .outage{margin-left:auto;color:#D64545;font-weight:700;cursor:pointer;font-size:.85rem;background:none;border:0;font-family:inherit}
+  .outage:hover{text-decoration:underline}
+  .astgrid{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;align-items:start}
+  .ahead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+  .fpill{background:#DCEFE9;color:#0B6B52;font-weight:700;font-size:.76rem;border-radius:99px;padding:7px 14px;white-space:nowrap}
+  .ah2{font-size:1.65rem;color:var(--ink);letter-spacing:-.4px;margin:10px 0 14px;line-height:1.2}
+  .groundnote{font-size:.75rem;color:var(--muted);margin-top:10px}
+  .hitl{background:linear-gradient(160deg,#0D1B41,#17346A);border-radius:18px;padding:26px;color:#fff}
+  .hitl h2{color:#fff;font-size:1.4rem;margin:10px 0;letter-spacing:-.3px;line-height:1.25}
+  .hitl p{color:#AEBBDF;font-size:.86rem;line-height:1.6;margin-bottom:16px}
+  .hitl hr{border:0;border-top:1px solid rgba(255,255,255,.15);margin:20px 0 14px}
+  .glist{list-style:none;display:flex;flex-direction:column;gap:9px;padding:0;margin-top:10px}
+  .glist li{font-size:.83rem;color:#C6D1EC}
+  .bubble.bot{background:#F1F4FA;border-radius:14px;max-width:88%}
+  .bname{display:block;font-weight:800;font-size:.78rem;color:var(--ink);margin-bottom:5px}
+  .bubble.bot .src{color:var(--teal);font-weight:700}
+  .hl .ic{width:10px;height:10px;border-radius:3px;background:var(--teal);margin-top:6px;font-size:0;flex:0 0 auto}
+  .cmono{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:.88rem;color:#fff;flex:0 0 auto;letter-spacing:.5px}
+  @media(max-width:920px){ .astgrid{grid-template-columns:1fr} }
+
+  /* ===== v4 login split ===== */
+  #view-login{display:block;padding:0;background:none;min-height:100vh;overflow:visible}
+  .lsplit{display:flex;min-height:100vh;width:100%}
+  .lleft{flex:1 1 auto;min-width:0;background:linear-gradient(150deg,#0C1B41 0%,#0E3A55 55%,#1B5D50 100%);color:#fff;padding:48px 64px;display:flex;flex-direction:column}
+  .lhero{margin:auto 0;max-width:900px;padding:60px 0}
+  .eyebrow.mint{color:#7FD6C2}
+  .lhero h1{color:#fff;font-size:clamp(2.4rem,5vw,4.6rem);line-height:1.06;letter-spacing:-1.4px;margin:18px 0 22px}
+  .lhero p{color:#C2D5DC;font-size:1.06rem;line-height:1.65;max-width:640px}
+  .lstat{display:flex;align-items:center;gap:14px;margin-top:44px}
+  .nums{color:var(--gold);font-size:2.1rem;font-weight:800;white-space:nowrap}
+  .nums i{font-style:normal;font-size:1.5rem;vertical-align:3px;margin:0 2px}
+  .cap{color:#C2D5DC;font-size:.8rem;max-width:220px;line-height:1.45}
+  .lright{flex:0 0 clamp(430px,37vw,640px);background:#fff;display:flex;align-items:center;padding:48px clamp(28px,4vw,64px);border-left:1px solid #E8ECF6}
+  .lcard{background:#fff;border-radius:0;box-shadow:none;padding:0;width:100%}
+  .lcard h1{font-size:2.3rem;color:var(--ink);letter-spacing:-.6px;margin:12px 0 10px}
+  .lsub{color:var(--muted);font-size:.9rem;line-height:1.55;margin-bottom:8px}
+  .lcard label{text-transform:none;letter-spacing:0;font-size:.88rem;font-weight:700;color:var(--ink);margin:16px 0 7px}
+  .lfoot{text-align:center;font-size:.72rem;color:var(--muted);margin-top:14px}
+  @media(max-width:860px){
+    .lsplit{flex-direction:column}
+    .lleft{padding:26px 22px}
+    .lhero{padding:26px 0 34px}
+    .lright{flex:1;border-left:0;border-top:1px solid #E8ECF6;padding:30px 22px}
+  }
+
+  /* ===== full-width dashboard ===== */
+  .dtop{display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:stretch}
+  .dtop .dhero{height:100%;margin:0}
+  .dtop .ghelp{display:flex;flex-direction:column;justify-content:center}
+  #glanceList{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));column-gap:40px}
+  @media(max-width:1100px){ .dtop{grid-template-columns:1fr} }
+
+  /* ===== per-page privacy bar ===== */
+  .privbar{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    padding:13px 40px;background:#fff;border-top:1px solid #E8ECF6;font-size:.8rem;color:var(--muted)}
+  .privbar b{color:var(--ink)}
+  .resetlink2{background:none;border:0;color:var(--teal);font-weight:700;font-size:.8rem;cursor:pointer;font-family:inherit;padding:4px 0}
+  .resetlink2:hover{text-decoration:underline}
+  @media(max-width:920px){ .privbar{padding:12px 18px} }
+
+  /* ===== events/careers/clubs aligned with class-register cards ===== */
+  .event,.job,.club{position:relative;overflow:hidden}
+  .event h3,.job h3,.club h3{padding-right:82px;font-size:1.08rem;letter-spacing:-.2px}
+  .event .cdept,.job .cdept,.club .cdept{margin-top:2px}
+  .event .codetag,.job .codetag,.club .codetag{font-size:.7rem;padding:9px 14px}
+  .cat.reg{align-self:flex-start}
+
+  /* ===== v5 mobile fixes ===== */
+  /* next-steps row: keep the Open link inside the card */
+  .step{gap:12px}
+  .sinfo{flex:1 1 auto;min-width:0}
+  .sinfo b,.sinfo span{overflow-wrap:anywhere}
+  .olink{flex:0 0 auto;margin-left:8px}
+  @media(max-width:920px){
+    /* toolbar: don't stick mid-page on mobile */
+    .topbar{position:static;padding:10px 16px;gap:10px;flex-wrap:nowrap}
+    /* one-line topbar: page title only, no eyebrow, compact profile */
+    .topbar .eyebrow{display:none}
+    .topbar h1{font-size:1.12rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tinfo{display:none}
+    .tavatar{width:34px;height:34px;font-size:.72rem}
+    .signout{padding:7px 12px;font-size:.78rem;white-space:nowrap}
+    /* duplicated assistant CTA: keep the hero button, hide the ghelp one */
+    .ghelp .whitebtn{display:none}
+  }
+  @media(max-width:860px){
+    /* login: compact — navy logo strip on top, form immediately below */
+    .lhero{display:none}
+    .lleft{flex:none;padding:16px 20px;justify-content:center}
+    .lright{flex:1;align-items:flex-start;justify-content:center;padding:28px 22px 40px;border-left:0}
+    .lcard h1{font-size:1.8rem;margin-top:8px}
+    .lsub{margin-bottom:2px}
+  }
+
+  /* ===== v5.1 mobile overflow redesign ===== */
+  @media(max-width:920px){
+    .maincol main{overflow-x:hidden}
+    .card{padding:18px}
+    #glanceList{column-gap:0}
+    .step{padding:13px 0}
+    /* responsive table -> stacked cards */
+    table.resp thead{display:none}
+    table.resp, table.resp tbody{display:block;width:100%}
+    table.resp tr{display:block;border:1.6px solid #E7ECFA;border-radius:14px;padding:12px 14px;margin-bottom:10px;background:#fff}
+    table.resp td{display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;padding:5px 0;text-align:right}
+    table.resp td::before{content:attr(data-label);font-size:.64rem;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);text-align:left;flex:0 0 auto}
+    table.resp td[data-label=""]{justify-content:flex-end}
+    table.resp td[data-label=""]::before{display:none}
+    table.resp td .btn{width:100%}
+  }
+
+  /* ---------- stakeholder roles ---------- */
+  .idlabel{display:block;font-size:.78rem;font-weight:700;margin:16px 0 8px;color:var(--ink)}
+  .idgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:2px}
+  .idcard{display:flex;align-items:center;gap:10px;background:#F5F7FB;border:1.6px solid transparent;border-radius:12px;padding:9px 11px;cursor:pointer;transition:.15s;text-align:left;font-family:inherit}
+  .idcard:hover{border-color:#C9D4F5;background:var(--sky)}
+  .idcard.sel{border-color:var(--indigo);background:var(--sky)}
+  .idcard .iav{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;flex:0 0 auto}
+  .idcard .itxt b{display:block;font-size:.8rem;color:var(--ink);line-height:1.25}
+  .idcard .itxt small{font-size:.67rem;color:var(--muted)}
+  .kpibar{height:7px;border-radius:99px;background:#EDF0FA;overflow:hidden;margin-top:12px}
+  .kpibar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--indigo),var(--navy))}
+  .kpibar i.gold{background:linear-gradient(90deg,#D99000,var(--gold))}
+  .checkrow{display:flex;align-items:flex-start;gap:10px;padding:11px 2px;border-bottom:1px solid #EDF0F8}
+  .checkrow:last-child{border-bottom:0}
+  .ckdot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-weight:800;flex:0 0 auto}
+  .ckdot.ok{background:var(--ok-bg);color:var(--ok)} .ckdot.warn{background:#FFF2CE;color:#8A6400}
+  .pipe{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .pipestep{background:#F5F7FB;border-radius:14px;padding:16px;border:1.6px solid transparent}
+  .pipestep.on{border-color:var(--ok);background:var(--ok-bg)}
+  .pipestep b{display:block;font-size:.92rem;color:var(--ink);margin-bottom:4px} .pipestep span{font-size:.76rem;color:var(--muted);line-height:1.45}
+  .reqchecks{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+  .reqchecks em{font-style:normal;font-size:.67rem;font-weight:700;border-radius:99px;padding:3px 9px;background:var(--ok-bg);color:var(--ok)}
+  .reqchecks em.no{background:var(--err-bg);color:var(--err)}
+  .tavatar img,.pmodal .tavatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+  /* ---------- floating AI assistant ---------- */
+  .ailaunch{position:fixed;right:22px;bottom:22px;z-index:78;width:60px;height:60px;border-radius:50%;border:0;cursor:pointer;
+    background:linear-gradient(135deg,var(--indigo),var(--navy));box-shadow:0 12px 28px rgba(19,31,83,.34);display:grid;place-items:center;transition:.2s}
+  .ailaunch:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(19,31,83,.42)}
+  .ailaunch svg{width:26px;height:26px;fill:#fff}
+  .ailaunch .badge{position:absolute;top:-3px;right:-3px;background:var(--gold);color:var(--navy);font-size:.58rem;font-weight:800;
+    border-radius:99px;padding:3px 7px;letter-spacing:.5px;box-shadow:0 3px 8px rgba(0,0,0,.2)}
+  .aiback{position:fixed;inset:0;z-index:74;background:rgba(19,31,83,.35);animation:fadein .2s ease}
+  .aipanel{position:fixed;right:22px;bottom:94px;z-index:76;width:min(400px,calc(100vw - 32px));height:min(560px,calc(100vh - 130px));
+    background:#fff;border-radius:20px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;animation:fadein .25s ease}
+  .aihead{background:linear-gradient(120deg,var(--navy),var(--indigo));color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex:0 0 auto;position:relative;z-index:3}
+  .aihead .ttl{flex:1;min-width:0}
+  .aihead b{display:block;font-size:.92rem;line-height:1.2}
+  .aihead small{font-size:.68rem;color:#C9D3F7}
+  .aihead button{background:rgba(255,255,255,.16);border:0;color:#fff;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:.9rem;flex:0 0 auto}
+  .aihead button:hover{background:rgba(255,255,255,.3)}
+  .aibody{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:14px;display:flex;flex-direction:column;gap:11px;background:#FAFBFE}
+  .aichips{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px;background:#FAFBFE;flex:0 0 auto;border-top:1px solid #EDF0FA}
+  .aichips button{background:#fff;border:1.4px solid #D9E2F8;color:var(--navy);border-radius:99px;padding:5px 11px;font-size:.72rem;
+    font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}
+  .aichips button:hover{background:var(--sky);border-color:var(--indigo)}
+  .aifoot{display:flex;gap:8px;padding:11px 12px;border-top:1px solid #EDF0FA;background:#fff;align-items:center;flex:0 0 auto}
+  .aifoot input{flex:1;padding:10px 13px;font-size:16px;border-radius:11px}   /* 16px stops iOS zoom-on-focus */
+  .aisend{flex:0 0 auto;border:0;border-radius:11px;width:40px;height:40px;cursor:pointer;color:#fff;
+    background:linear-gradient(120deg,var(--navy),var(--indigo));font-size:1rem}
+  .aisend:disabled{opacity:.45;cursor:not-allowed}
+  .aikey{position:absolute;left:0;right:0;top:56px;bottom:0;z-index:4;overflow-y:auto;overscroll-behavior:contain;
+    padding:16px;background:var(--sky);font-size:.8rem;line-height:1.55;color:var(--ink);animation:fadein .2s ease}
+  .aikey b{display:block;margin-bottom:5px;color:var(--navy)}
+  .aikey input{margin:8px 0 4px;font-size:.85rem;padding:10px 12px}
+  .aikey a{color:var(--indigo);font-weight:700}
+  .aikey .warn{display:block;margin-top:8px;font-size:.72rem;color:#8A6400;background:#FFF2CE;border-radius:9px;padding:8px 10px}
+  .aimodel{font-size:.66rem;color:var(--muted);text-align:center;padding:0 12px 9px;background:#fff;flex:0 0 auto}
+  .aimodel a{color:var(--indigo);cursor:pointer;font-weight:700}
+  @media(max-width:640px){
+    .aipanel{inset:0;right:0;left:0;bottom:0;top:0;width:auto;height:auto;border-radius:0;animation:none}
+    .aiback{animation:none}
+    .aifoot{padding-bottom:calc(11px + env(safe-area-inset-bottom))}
+    .ailaunch{right:16px;bottom:16px}
+    .aichips{overflow-x:auto;flex-wrap:nowrap}
+    .aichips button{white-space:nowrap}
+  }
+  .pmask{position:fixed;inset:0;background:rgba(19,31,83,.45);z-index:60;display:grid;place-items:center;padding:20px}
+  .pmodal{background:#fff;border-radius:20px;box-shadow:var(--shadow-lg);padding:26px 26px 22px;width:min(470px,100%);max-height:92vh;overflow:auto}
+  .pmodal h2{font-size:1.15rem;color:var(--ink);margin-bottom:4px}
+  .pmodal .psmall{font-size:.8rem;color:var(--muted);margin-bottom:10px}
+  .pavrow{display:flex;gap:14px;align-items:center;margin:12px 0 4px}
+  .tavatar.big{width:64px;height:64px;font-size:1.15rem;flex:0 0 auto}
+  .pmodal label{display:block;font-size:.76rem;font-weight:700;margin:12px 0 5px;color:var(--ink)}
+  .pbtns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+  @media(max-width:640px){ .idgrid{grid-template-columns:1fr} .pipe{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+
+
+
+
+<!-- LOGIN -->
+<section id="view-login">
+  <div class="lsplit">
+    <div class="lleft">
+      <div class="sblogo">
+        <div class="smark">CC</div>
+        <div><b>CampusConnect</b><small>BlueSky Technology University</small></div>
+      </div>
+      <div class="lhero">
+        <span class="eyebrow mint">One campus. One calm starting point.</span>
+        <h1>Student services without the portal maze.</h1>
+        <p>Register for classes, discover events, book appointments, and get grounded answers from one FERPA-aware experience.</p>
+        <div class="lstat"><span class="nums">5 <i>&rarr;</i> 1</span><span class="cap">fragmented systems consolidated in the MVP</span></div>
+      </div>
+    </div>
+    <div class="lright">
+      <div class="lcard">
+        <span class="eyebrow">Functional prototype</span>
+        <h1>Welcome back</h1>
+        <p class="lsub">Pick a stakeholder identity below — the password auto-fills, and every role opens its own workspace.</p>
+        <span class="idlabel">1 · Select a demo identity</span>
+        <div class="idgrid">
+          <button type="button" class="idcard sel" data-email="jamie.torres@btu.edu" onclick="pickId('jamie.torres@btu.edu')"><span class="iav" style="background:#3B4CCA">JT</span><span class="itxt"><b>Jamie Torres</b><small>Student</small></span></button>
+          <button type="button" class="idcard" data-email="lisa.nguyen@btu.edu" onclick="pickId('lisa.nguyen@btu.edu')"><span class="iav" style="background:#0D9488">LN</span><span class="itxt"><b>Lisa Nguyen</b><small>Student Gov President</small></span></button>
+          <button type="button" class="idcard" data-email="susan.walker@btu.edu" onclick="pickId('susan.walker@btu.edu')"><span class="iav" style="background:#7C3AED">SW</span><span class="itxt"><b>Dr. Susan Walker</b><small>Executive Sponsor (VP)</small></span></button>
+          <button type="button" class="idcard" data-email="david.chen@btu.edu" onclick="pickId('david.chen@btu.edu')"><span class="iav" style="background:#B45309">DC</span><span class="itxt"><b>David Chen</b><small>CFO · Budget Owner</small></span></button>
+          <button type="button" class="idcard" data-email="kevin.wong@btu.edu" onclick="pickId('kevin.wong@btu.edu')"><span class="iav" style="background:#16A34A">KW</span><span class="itxt"><b>Kevin Wong</b><small>IT Director</small></span></button>
+          <button type="button" class="idcard" data-email="priya.patel@btu.edu" onclick="pickId('priya.patel@btu.edu')"><span class="iav" style="background:#C93B34">PP</span><span class="itxt"><b>Priya Patel</b><small>Cybersecurity Officer</small></span></button>
+          <button type="button" class="idcard" data-email="emily.johnson@btu.edu" onclick="pickId('emily.johnson@btu.edu')"><span class="iav" style="background:#D97706">EJ</span><span class="itxt"><b>Emily Johnson</b><small>Academic Advisor</small></span></button>
+        </div>
+        <span class="idlabel">2 · Sign in</span>
+        <label for="email">University email</label>
+        <input id="email" type="email" autocapitalize="none" autocorrect="off" autocomplete="off" spellcheck="false" value="jamie.torres@btu.edu">
+        <label for="pw">Password</label>
+        <input id="pw" type="password" autocapitalize="none" autocorrect="off" autocomplete="off" value="demo1234" onkeydown="if(event.key==='Enter')login()">
+        <div class="msg" id="loginMsg"></div>
+        <button class="btn block" onclick="login()">Enter CampusConnect</button>
+        <p class="lfoot">Demo-only authentication &middot; Device-local data &middot; No external APIs</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="appShell" class="hidden">
+<aside class="sidebar">
+  <div class="sblogo">
+    <div class="smark">CC</div>
+    <div><b>CampusConnect</b><small>BlueSky Technology University</small></div>
+  </div>
+  <div class="snav">
+    <button data-view="home" data-roles="student,president" class="active" onclick="show('home',this)">My dashboard</button>
+    <button data-view="reg" data-roles="student,president" onclick="show('reg',this)">Class register</button>
+    <button data-view="events" data-roles="student,president" onclick="show('events',this)">Events</button>
+    <button data-view="careers" data-roles="student,president" onclick="show('careers',this)">Careers</button>
+    <button data-view="appts" data-roles="student,president" onclick="show('appts',this)">Appointments</button>
+    <button data-view="clubs" data-roles="student,president" onclick="show('clubs',this)">Clubs</button>
+    <button data-view="clubmgmt" data-roles="president" onclick="show('clubmgmt',this)">Club management</button>
+    <button data-view="exec" data-roles="sponsor" onclick="show('exec',this)">Executive dashboard</button>
+    <button data-view="itops" data-roles="it,security" onclick="show('itops',this)">IT governance</button>
+    <button data-view="budget" data-roles="cfo" onclick="show('budget',this)">Budget &amp; ROI</button>
+    <button data-view="security" data-roles="security" onclick="show('security',this)">Security &amp; compliance</button>
+    <button data-view="advisor" data-roles="advisor" onclick="show('advisor',this)">Advisor console</button>
+  </div>
+  <div class="sfoot">
+    <div class="privcard"><b>Demo privacy mode</b>No real student records are used.</div>
+    <button class="resetlink" onclick="resetDemo()">Reset demo data</button>
+  </div>
+</aside>
+<div class="maincol">
+<div class="topbar">
+  <div><span class="eyebrow">Student Services MVP</span><h1 id="pageTitle">My Dashboard</h1></div>
+  <div class="tright">
+    <div class="tavatar" id="topAvatar" onclick="openProfile()" title="Edit my profile" style="cursor:pointer">?</div>
+    <div class="tinfo" onclick="openProfile()" title="Edit my profile" style="cursor:pointer"><b id="topName"></b><span id="topMeta"></span></div>
+    <button class="signout" onclick="logout()">Sign out</button>
+  </div>
+</div>
+<main>
+  <!-- HOME / DASHBOARD -->
+  <section id="view-home" class="hidden">
+    <div class="dtop">
+    <div class="dhero">
+      <div class="dhero-l">
+        <span class="eyebrow gold" id="dashDate"></span>
+        <h1 id="dashGreet">Welcome</h1>
+        <p id="dashSummary"></p>
+      </div>
+      <button class="btn goldbtn" onclick="tryAsk('What can you help me with?')">Ask the campus assistant</button>
+    </div>
+      <div class="ghelp">
+        <span class="eyebrow gold">Grounded help</span>
+        <h2>Ask without oversharing.</h2>
+        <p>The assistant answers from approved campus FAQs, can summarize your own schedule and bookings, and redirects sensitive record requests to the Registrar.</p>
+        <button class="btn whitebtn" onclick="tryAsk('How do I drop a class?')">Try “How do I drop a class?”</button>
+        <span class="qmark">?</span>
+      </div>
+    </div>
+    <div class="dstats">
+      <div class="dstat" role="link" tabindex="0" onclick="navTo('reg')" onkeydown="if(event.key==='Enter')navTo('reg')"><span class="eyebrow">Registered</span><b id="statReg">0</b><span class="dsub">courses this term</span></div>
+      <div class="dstat" role="link" tabindex="0" onclick="navTo('events')" onkeydown="if(event.key==='Enter')navTo('events')"><span class="eyebrow">Saved events</span><b id="statSaved">0</b><span class="dsub">RSVP confirmed</span></div>
+      <div class="dstat" role="link" tabindex="0" onclick="navTo('appts')" onkeydown="if(event.key==='Enter')navTo('appts')"><span class="eyebrow">Appointments</span><b id="statAppts">0</b><span class="dsub">confirmed</span></div>
+      <div class="dstat status"><span class="eyebrow">System status</span><b>All clear</b><span class="dsub">demo services operational</span></div>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Today at a glance</span>
+      <h2 class="dh2">Your next steps</h2>
+      <div id="glanceList"></div>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section id="view-events" class="hidden">
+    <div class="phero">
+      <div>
+        <span class="eyebrow">Campus life</span>
+        <h1>One directory for campus life.</h1>
+        <p class="psub">Academic, social, and wellness events from across campus. Career fairs and workshops live in the Careers tab.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <input id="evSearch" placeholder="Search events" oninput="renderEvents()">
+        <select id="evCat" onchange="renderEvents()">
+          <option value="">All categories</option>
+          <option>Academic</option><option>Social</option><option>Wellness</option>
+        </select>
+      </div>
+      <div class="grid" id="evGrid"></div>
+      <p class="sub hidden" id="evEmpty" style="margin-top:16px">No events match your search. Try different keywords or clear the filter.</p>
+    </div>
+  </section>
+
+  <!-- EVENT DETAIL -->
+  <section id="view-eventDetail" class="hidden">
+    <button class="backbtn" id="evBack" onclick="navTo('events')">← All events</button>
+    <div id="eventDetailBody"></div>
+  </section>
+
+  <!-- CLASS REGISTRATION -->
+  <section id="view-reg" class="hidden">
+    <div class="phero">
+      <div>
+        <span class="eyebrow">MVP core flow</span>
+        <h1>Build a conflict-free class plan.</h1>
+        <p class="psub">Search the demo catalog and add or drop courses. Changes stay on this device.</p>
+      </div>
+      <span class="selpill" id="selCount">0 registered</span>
+    </div>
+    <div class="card">
+      <label class="flabel" for="crSearch">Search</label>
+      <div class="toolbar" style="margin:0 0 18px">
+        <input id="crSearch" placeholder="Course, code, or subject" oninput="renderCourses()">
+        <select id="crDept" onchange="renderCourses()">
+          <option value="">All departments</option>
+          <option>Computer Science</option><option>Business</option><option>Mathematics</option>
+          <option>English</option><option>Biology</option><option>Psychology</option><option>Art &amp; Design</option>
+        </select>
+      </div>
+      <div class="msg" id="regMsg"></div>
+      <div class="courses" id="courseCards"></div>
+      <p class="sub hidden" id="crEmpty" style="margin-top:16px">No courses match your search. Try different keywords or clear the filter.</p>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Enrolled</span>
+      <h2 class="dh2">My schedule</h2>
+      <table class="resp"><thead><tr><th>Code</th><th>Course</th><th>Schedule</th><th>Credits</th><th>Status</th><th></th></tr></thead>
+      <tbody id="regRows"><tr><td colspan="6" class="sub">No courses yet.</td></tr></tbody></table>
+      <p class="sub" id="credTotal" style="margin-top:10px"></p>
+    </div>
+  </section>
+
+  <!-- CLUB DIRECTORY -->
+  <section id="view-clubs" class="hidden">
+    <div class="phero">
+      <div>
+        <span class="eyebrow">Student life</span>
+        <h1>Find your people.</h1>
+        <p class="psub">Every registered student organization at BTU — searchable by name or category. Join instantly; most clubs welcome complete beginners.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <input id="clSearch" placeholder="Search clubs" oninput="renderClubs()">
+        <select id="clCat" onchange="renderClubs()">
+          <option value="">All categories</option>
+          <option>Academic</option><option>Cultural</option><option>Arts</option>
+          <option>Athletic</option><option>Service</option><option>Hobby</option>
+        </select>
+      </div>
+      <div class="msg" id="clubMsg"></div>
+      <div class="clubs" id="clubCards"></div>
+      <p class="sub hidden" id="clEmpty" style="margin-top:16px">No clubs match your search. Try different keywords or clear the filter.</p>
+    </div>
+  </section>
+
+  <!-- CAREER SERVICES / JOB BOARD -->
+  <section id="view-careers" class="hidden">
+    <div class="phero">
+      <div>
+        <span class="eyebrow">Career services</span>
+        <h1>Jobs and prep, one desk.</h1>
+        <p class="psub">Listings from the Career Services office, now integrated into CampusConnect — no more siloed career site. Apply directly, then book a Career Advisor to prep.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <input id="jbSearch" placeholder="Search jobs, companies, skills" oninput="renderJobs()">
+        <select id="jbType" onchange="renderJobs()">
+          <option value="">All types</option>
+          <option>Internship</option><option>Co-op</option><option>Part-time</option><option>Full-time</option>
+        </select>
+      </div>
+      <div class="msg" id="careerMsg"></div>
+      <div class="jobs" id="jobCards"></div>
+      <p class="sub hidden" id="jbEmpty" style="margin-top:16px">No jobs match your search. Try different keywords or clear the filter.</p>
+    </div>
+    <div class="card">
+      <span class="eyebrow">On campus</span>
+      <h2 class="dh2">Upcoming career events</h2>
+      <p class="sub">Career fairs, workshops, and interview practice — click any event for details, the company list, and RSVP.</p>
+      <div class="grid" id="careerEvGrid"></div>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Your prep team</span>
+      <h2 class="dh2">Meet the Career Advisors</h2>
+      <p class="sub">Resume reviews, mock interviews, job-search strategy, and offer negotiation — free for all BTU students.</p>
+      <div class="hl-grid" id="advListCareers"></div>
+      <button class="btn" style="margin-top:16px" onclick="navTo('appts')">Book a Career Advisor</button>
+    </div>
+  </section>
+
+  <!-- APPOINTMENTS -->
+  <section id="view-appts" class="hidden">
+    <div class="phero">
+      <div>
+        <span class="eyebrow">Student support</span>
+        <h1>Book the right person, not another portal.</h1>
+        <p class="psub">Academic advising, career services, and IT help in one scheduler. Availability is illustrative and stored locally for the demo.</p>
+      </div>
+    </div>
+    <div class="msg" id="apptMsg"></div>
+    <div class="confbox hidden" id="confBox">
+      <span class="eyebrow">Confirmed</span>
+      <div id="confList"></div>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Next available</span>
+      <h2 class="dh2">Choose a time</h2>
+      <div class="toolbar" style="margin:12px 0 6px">
+        <select id="apType" onchange="renderSlots()">
+          <option value="">All appointment types</option>
+          <option value="Advising">Academic Advising</option>
+          <option value="Career">Career Services</option>
+          <option value="IT">IT Help Desk</option>
+        </select>
+      </div>
+      <div id="slotRows"></div>
+    </div>
+  </section>
+
+  <!-- ASSISTANT -->
+  <!-- CLUB MANAGEMENT (Student Government President) -->
+  <section id="view-clubmgmt" class="hidden">
+    <div class="phero"><div><span class="eyebrow">Student Government</span><h1>Keep the club directory alive.</h1><p class="psub">Create new organizations, pause dormant ones, and make sure every student can find their people.</p></div></div>
+    <div class="card">
+      <span class="eyebrow">New organization</span>
+      <h2 class="dh2">Create a club</h2>
+      <div class="toolbar">
+        <input id="ncName" placeholder="Club name">
+        <select id="ncCat"><option>Academic</option><option>Cultural</option><option>Arts</option><option>Athletic</option><option>Service</option><option>Hobby</option></select>
+      </div>
+      <div class="toolbar">
+        <input id="ncMeet" placeholder="Meeting time &amp; place (e.g., Tue 6:00 PM · Union 210)">
+        <input id="ncMail" placeholder="Contact email">
+      </div>
+      <div class="toolbar"><input id="ncDesc" placeholder="One-sentence description students will see in the directory"></div>
+      <div class="msg" id="ncMsg"></div>
+      <button class="btn small" style="margin-top:10px" onclick="createClub()">+ Create club</button>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Directory health</span>
+      <h2 class="dh2">Manage existing clubs</h2>
+      <div id="mgmtList"></div>
+    </div>
+  </section>
+
+  <!-- EXECUTIVE DASHBOARD (Sponsor) -->
+  <section id="view-exec" class="hidden">
+    <div class="phero"><div><span class="eyebrow">Executive Sponsor</span><h1>Board demo, on track.</h1><p class="psub">The numbers you will take into the Board of Trustees meeting — budget, adoption, NPS movement, and demo readiness.</p></div></div>
+    <div class="dstats" id="execKpis"></div>
+    <div class="card"><span class="eyebrow">Demo readiness</span><h2 class="dh2">What the Board will see working</h2><div id="execChecklist"></div></div>
+    <div class="card"><span class="eyebrow">Weekly status</span><h2 class="dh2">This week's digest</h2><div id="execDigest"></div></div>
+  </section>
+
+  <!-- IT GOVERNANCE (IT Director) -->
+  <section id="view-itops" class="hidden">
+    <div class="phero"><div><span class="eyebrow">IT Governance</span><h1>Nothing ships unreviewed.</h1><p class="psub">Human-in-the-loop gates for AI-generated code: check the evidence, then grant or refuse staging access.</p></div></div>
+    <div class="card"><span class="eyebrow">Environments</span><h2 class="dh2">Deployment pipeline</h2><div class="pipe" id="pipeSteps"></div></div>
+    <div class="card"><span class="eyebrow">Approval queue</span><h2 class="dh2">Staging promotion requests</h2><div class="msg" id="itMsg"></div><div id="reqList"></div></div>
+    <div class="card"><span class="eyebrow">Security posture</span><h2 class="dh2">Compliance snapshot</h2><div id="secList"></div></div>
+  </section>
+
+  <!-- ADVISOR CONSOLE (Advisor) -->
+  <section id="view-advisor" class="hidden">
+    <div class="phero"><div><span class="eyebrow">Advising</span><h1>Your calendar, your rules.</h1><p class="psub">Open only the hours you choose, and confirm each booking before it lands on your schedule.</p></div></div>
+    <div class="card"><span class="eyebrow">Requests</span><h2 class="dh2">Pending booking requests</h2><div class="msg" id="advMsg"></div><div id="advReqs"></div></div>
+    <div class="card"><span class="eyebrow">Availability</span><h2 class="dh2">My open time blocks</h2>
+      <div class="toolbar">
+        <input type="date" id="abDay" title="Pick a date">
+        <select id="abStart" title="Start time"></select>
+        <select id="abEnd" title="End time"></select>
+        <button class="btn small" onclick="addBlock()">Open this block</button>
+      </div>
+      <p class="sub" style="margin-top:-6px">Pick a date and a start/end time — blocks are published in a consistent format automatically.</p>
+      <div id="advBlocks"></div>
+    </div>
+  </section>
+
+  <!-- BUDGET & ROI (CFO) -->
+  <section id="view-budget" class="hidden">
+    <div class="phero"><div><span class="eyebrow">CFO Workspace</span><h1>Every dollar accounted for.</h1><p class="psub">Weekly burn against the committed $5,000 — plus the value evidence you asked for: efficiency gains and student engagement.</p></div></div>
+    <div class="dstats" id="cfoKpis"></div>
+    <div class="card"><span class="eyebrow">Burn rate</span><h2 class="dh2">Weekly spend</h2><div id="burnRows"></div><p class="sub" style="margin-top:12px">Per your guidance: no additional approval workflow — the team will flag immediately if a budget-overrun risk emerges.</p></div>
+    <div class="card"><span class="eyebrow">Return on investment</span><h2 class="dh2">Value delivered so far</h2><div id="roiList"></div></div>
+  </section>
+
+  <!-- SECURITY & COMPLIANCE (Cybersecurity Officer) -->
+  <section id="view-security" class="hidden">
+    <div class="phero"><div><span class="eyebrow">Cybersecurity &amp; Compliance</span><h1>Audit-ready, every day.</h1><p class="psub">FERPA posture, data inventory, and audit evidence for the CampusConnect sandbox — nothing sensitive leaves this device.</p></div></div>
+    <div class="dstats" id="secKpis"></div>
+    <div class="card"><span class="eyebrow">Data inventory</span><h2 class="dh2">What the MVP stores, and how</h2><div id="dataInv"></div></div>
+    <div class="card"><span class="eyebrow">Audit readiness</span><h2 class="dh2">Evidence checklist</h2><div class="msg" id="secMsg"></div><div id="auditList"></div><button class="btn small" style="margin-top:12px" onclick="spotCheck()">Run compliance spot-check</button></div>
+  </section>
+</main></main>
+<div class="privbar">
+  <span><b>Demo privacy mode</b> &middot; No real student records are used.</span>
+  <button class="resetlink2" onclick="resetDemo()">Reset demo data</button>
+</div>
+</div>
+</div>
+
+<footer>
+  CampusConnect MVP · CampusConnect Consultants · BlueSky Technology University<br>
+  Mock data only (FERPA-safe) · Built with AI assistance, 100% human-reviewed
+</footer>
+
+<script>
+/* ---------- Mock data (no real PII — FERPA-safe) ---------- */
+const USERS = {
+  'jamie.torres@btu.edu':  { pw:'demo1234', name:'Jamie Torres', major:'Business Administration', year:2026, role:'student' },
+  'david.chen@btu.edu':   { pw:'demo1234', name:'David Chen', title:'Chief Financial Officer', role:'cfo' },
+  'priya.patel@btu.edu':  { pw:'demo1234', name:'Priya Patel', title:'Cybersecurity & Compliance Officer', role:'security' },
+  'lisa.nguyen@btu.edu':  { pw:'demo1234', name:'Lisa Nguyen', title:'Student Government President', major:'Political Science', year:2026, role:'president' },
+  'susan.walker@btu.edu': { pw:'demo1234', name:'Dr. Susan Walker', title:'VP Student Affairs · Executive Sponsor', role:'sponsor' },
+  'kevin.wong@btu.edu':   { pw:'demo1234', name:'Kevin Wong', title:'IT Director · Systems & Architecture', role:'it' },
+  'emily.johnson@btu.edu':{ pw:'demo1234', name:'Emily Johnson', title:'Academic & Career Advisor', role:'advisor' }
+};
+
+/* Category theming for detail-page banners */
+const CAT_THEME = {
+  Career:   {g:'linear-gradient(120deg,#8A5A00,#D99000,#F5B301)', e:'💼'},
+  Academic: {g:'linear-gradient(120deg,#16255F,#2C3D8F,#5A55C4)', e:'📚'},
+  Social:   {g:'linear-gradient(120deg,#7A1B4B,#B02A6C,#E85D9E)', e:'🎉'},
+  Wellness: {g:'linear-gradient(120deg,#0B5A38,#0F7A4D,#2FA872)', e:'🌿'}
+};
+
+const EVENTS = [
+  {id:1, t:'Fall Career Fair', c:'Career', d:'Sep 12', m:'SEP', dd:'12', time:'10:00 AM – 4:00 PM', loc:'Grand Hall', emoji:'🏢',
+   desc:'60+ employers hiring interns and grads.',
+   long:['The biggest recruiting event of the semester. Over 60 employers across tech, healthcare, finance, gaming, logistics, and media will be on campus hiring for internships, co-ops, and full-time roles.',
+         'Doors open at 10 AM — arrive early for shorter lines at top employers. On-the-spot first-round interviews run 2–4 PM in the side rooms; check in at the front desk when you arrive.'],
+   hl:[['📄','Bring 10+ printed resumes','Stop by the Career Center for free same-day printing.'],
+       ['👔','Dress business casual','Blazers available to borrow from the Career Closet, Room 1A.'],
+       ['🎤','On-the-spot interviews 2–4 PM','Several employers conduct first rounds at the fair.'],
+       ['📸','Free LinkedIn photo booth','Professional headshots near the main entrance, all day.']],
+   companies:[
+     {n:'BlueSky Cloud',    i:'BC', col:'#2563EB', roles:'SWE interns · Cloud ops · IT support'},
+     {n:'Vertex Robotics',  i:'VR', col:'#DC2626', roles:'Embedded systems · Mechanical eng'},
+     {n:'Nimbus Analytics', i:'NA', col:'#7C3AED', roles:'Data science · BI analysts'},
+     {n:'Harbor Health',    i:'HH', col:'#0D9488', roles:'Health IT · Nursing informatics'},
+     {n:'Quantia Finance',  i:'QF', col:'#B45309', roles:'Fintech analysts · Risk & compliance'},
+     {n:'Redwood Games',    i:'RG', col:'#16A34A', roles:'Game dev · 3D art · QA'},
+     {n:'Atlas Logistics',  i:'AL', col:'#475569', roles:'Supply chain · Operations'},
+     {n:'Lumen Media',      i:'LM', col:'#DB2777', roles:'Marketing · UX design · Content'}],
+   coTitle:'Companies attending (partial list)'},
+  {id:2, t:'Resume Workshop', c:'Career', d:'Sep 5', m:'SEP', dd:'5', time:'3:00 PM – 4:30 PM', loc:'Career Center 2B', emoji:'📝',
+   desc:'Bring your resume for live feedback.',
+   long:['A hands-on working session — bring a draft (or start from scratch) and leave with a recruiter-ready resume. Career advisors and industry volunteers give one-on-one feedback in small rotations.',
+         'Perfect timing: one week before the Fall Career Fair. Laptops available if you don\'t bring your own.'],
+   hl:[['✍️','Live 1:1 feedback','15-minute rotations with advisors and recruiters.'],
+       ['🧩','ATS-friendly templates','Take home formats that pass automated screening.'],
+       ['🤖','AI resume review demo','See how to use AI tools to tailor your resume — responsibly.']]},
+  {id:3, t:'Mock Interview Day', c:'Career', d:'Sep 19', m:'SEP', dd:'19', time:'11:00 AM – 3:00 PM', loc:'Career Center', emoji:'🎤',
+   desc:'Practice interviews with alumni.',
+   long:['Practice a full 30-minute interview with BTU alumni working in your target field, followed by 15 minutes of honest feedback. Choose behavioral, technical, or case-style formats when you sign up.',
+         'Slots are limited — sign up at the Career Center front desk or email careers@btu.edu.'],
+   hl:[['⏱️','30 min interview + 15 min feedback','Realistic pacing, real interviewers.'],
+       ['💻','Behavioral, technical, or case','Pick your format at sign-up.'],
+       ['📋','Written scorecard','Take home concrete improvement notes.']]},
+  {id:4, t:'Course Registration Q&A', c:'Academic', d:'Aug 28', m:'AUG', dd:'28', time:'12:00 PM – 2:00 PM', loc:'Advising Lounge', emoji:'🗂️',
+   desc:'Advisors answer registration questions.',
+   long:['Drop in any time — advisors from every college answer questions about registration windows, waitlists, holds, prerequisites, and degree plans before the add/drop deadline.',
+         'Bring your student ID and a draft schedule if you have one. No appointment needed — you can also register directly in the Class Registration tab.'],
+   hl:[['🕐','Drop-in, no appointment','Come any time between 12 and 2.'],
+       ['🧭','All colleges represented','Engineering, Business, Arts & Sciences, Health.'],
+       ['🔓','Holds resolved on-site','Registrar staff can clear most holds same-day.']]},
+  {id:5, t:'Study Skills Bootcamp', c:'Academic', d:'Sep 8', m:'SEP', dd:'8', time:'5:00 PM – 7:00 PM', loc:'Library 301', emoji:'🧠',
+   desc:'Note-taking, time management, exam prep.',
+   long:['A two-hour crash course in evidence-based study techniques: spaced repetition, active recall, Cornell note-taking, and a time-blocking system you can set up on your phone before you leave.',
+         'Run by the Academic Success Center. Free planners and snacks for all attendees.'],
+   hl:[['🗓️','Time-blocking setup','Leave with your semester calendar actually built.'],
+       ['🔁','Active recall & spaced repetition','The two techniques with the strongest evidence.'],
+       ['🎁','Free planner + snacks','Courtesy of the Academic Success Center.']]},
+  {id:6, t:'Welcome Week Mixer', c:'Social', d:'Aug 25', m:'AUG', dd:'25', time:'6:00 PM – 9:00 PM', loc:'Student Union', emoji:'🎊',
+   desc:'Meet new students. Free food.',
+   long:['The official kickoff of the semester. Music, games, a taco bar, and a photo wall — come meet your classmates before the syllabus does.',
+         'First 200 students get a free BTU t-shirt. Bring your student ID for entry.'],
+   hl:[['🌮','Free taco bar','Vegetarian and gluten-free options included.'],
+       ['🎶','Live DJ + lawn games','Giant Jenga tournament at 7:30 PM.'],
+       ['👕','Free t-shirts','First 200 students through the door.']]},
+  {id:7, t:'Club Expo', c:'Social', d:'Sep 3', m:'SEP', dd:'3', time:'11:00 AM – 3:00 PM', loc:'The Quad', emoji:'🎭',
+   desc:'Explore 40+ student clubs.',
+   long:['Every registered student organization in one place. Walk the Quad, talk to current members, and sign up on the spot — most clubs welcome beginners.',
+         'Can\'t make it? Browse and join any club year-round in the Clubs tab of CampusConnect.'],
+   hl:[['🤝','40+ clubs, one afternoon','Academic, cultural, athletic, and hobby orgs.'],
+       ['✨','Sign up on the spot','Most clubs have no experience requirements.'],
+       ['🍿','Free popcorn & music','It\'s a festival, not a form.']],
+   companies:[
+     {n:'AI Builders Club',   i:'AI', col:'#3B4CCA', roles:'Weekly build nights · Hackathons'},
+     {n:'Robotics Society',   i:'RS', col:'#DC2626', roles:'Competition team · Open lab hours'},
+     {n:'Outdoor Adventures', i:'OA', col:'#16A34A', roles:'Hikes · Camping · Climbing wall'},
+     {n:'BTU eSports',        i:'ES', col:'#7C3AED', roles:'5 varsity titles · Casual nights'},
+     {n:'A Cappella Groups',  i:'AC', col:'#DB2777', roles:'Auditions Sep 8–10'},
+     {n:'Volunteer Corps',    i:'VC', col:'#0D9488', roles:'Weekly service projects'}],
+   coTitle:'Featured clubs'},
+  {id:8, t:'Mindfulness & Stress Relief', c:'Wellness', d:'Sep 10', m:'SEP', dd:'10', time:'4:00 PM – 5:00 PM', loc:'Wellness Center', emoji:'🧘',
+   desc:'Guided session, drop-in friendly.',
+   long:['A gentle, beginner-friendly hour: guided breathing, a short body-scan meditation, and practical techniques for exam-season stress. No experience or equipment needed — mats provided.',
+         'Runs every other Wednesday all semester. Counseling staff are available afterward if you want to talk.'],
+   hl:[['🫁','Guided breathing & body scan','Beginner-friendly, mats provided.'],
+       ['🔄','Repeats biweekly','Same time every other Wednesday.'],
+       ['💬','Counselors on hand','Optional chat with Wellness staff after.']]},
+  {id:9, t:'Intramural Sign-up Day', c:'Wellness', d:'Sep 6', m:'SEP', dd:'6', time:'10:00 AM – 2:00 PM', loc:'Rec Center', emoji:'⚽',
+   desc:'Soccer, basketball, volleyball leagues.',
+   long:['Fall league registration for soccer, basketball, volleyball, and flag football. Join with a full team or sign up solo — free agents are placed on teams that need players.',
+         'All skill levels welcome; leagues are divided into competitive and just-for-fun divisions. Season runs Sep 15 – Nov 20.'],
+   hl:[['🏀','4 sports, 2 divisions','Competitive or just-for-fun — you choose.'],
+       ['🙋','Solo sign-ups welcome','Free agents matched to teams.'],
+       ['🗓️','Season Sep 15 – Nov 20','Games on weekday evenings.']]}
+];
+
+/* ---------- Course catalog (Fall 2026) ---------- */
+const MAX_CREDITS = 18;
+const COURSES = [
+  {id:1, code:'CS 201', t:'Introduction to Programming', dept:'Computer Science', cr:3, inst:'Dr. J. Kim',
+   sched:'MWF 9:00 AM – 9:50 AM', loc:'Tech Hall 210', cap:40, enr:32, prereq:'None',
+   desc:'Learn to program in Python from zero: variables, control flow, functions, and a taste of data analysis. The foundation course for all computing majors — no prior experience expected.'},
+  {id:2, code:'CS 305', t:'Data Structures & Algorithms', dept:'Computer Science', cr:4, inst:'Prof. M. Osei',
+   sched:'TTh 11:00 AM – 12:15 PM', loc:'Tech Hall 115', cap:35, enr:35, prereq:'CS 201',
+   desc:'Arrays, linked lists, trees, graphs, hashing, and the classic algorithms behind technical interviews. Heavy on practice: weekly coding labs and two team projects.'},
+  {id:3, code:'BUS 110', t:'Principles of Marketing', dept:'Business', cr:3, inst:'Dr. A. Flores',
+   sched:'MW 2:00 PM – 3:15 PM', loc:'Hayes 208', cap:60, enr:41, prereq:'None',
+   desc:'How brands win attention: segmentation, positioning, pricing, and digital campaigns. Ends with a real marketing project for a local business client.'},
+  {id:4, code:'MATH 220', t:'Calculus II', dept:'Mathematics', cr:4, inst:'Dr. S. Novak',
+   sched:'MTWF 10:00 AM – 10:50 AM', loc:'Science 130', cap:45, enr:38, prereq:'MATH 120',
+   desc:'Integration techniques, sequences and series, and an introduction to differential equations. Free peer tutoring available all semester through the Math Lab.'},
+  {id:5, code:'ENG 150', t:'Creative Writing Workshop', dept:'English', cr:3, inst:'Prof. D. Achebe',
+   sched:'T 4:00 PM – 6:30 PM', loc:'Humanities 12', cap:18, enr:15, prereq:'None',
+   desc:'A small workshop in fiction and poetry: write weekly, discuss your peers\' work, and finish with a polished portfolio. Counts toward the arts core requirement.'},
+  {id:6, code:'BIO 101', t:'Introduction to Biology + Lab', dept:'Biology', cr:4, inst:'Dr. R. Patel',
+   sched:'MWF 1:00 PM – 1:50 PM · Lab Th 2:00 PM – 4:50 PM', loc:'Science 220', cap:48, enr:44, prereq:'None',
+   desc:'Cells, genetics, evolution, and ecology, paired with a weekly hands-on lab. Fulfills the natural science requirement for majors and non-majors alike.'},
+  {id:7, code:'PSY 205', t:'Social Psychology', dept:'Psychology', cr:3, inst:'Dr. E. Marsh',
+   sched:'TTh 9:30 AM – 10:45 AM', loc:'Hayes 310', cap:50, enr:29, prereq:'PSY 101 recommended',
+   desc:'Why people conform, persuade, help, and clash. Classic experiments meet current research on social media behavior — a popular elective across every major.'},
+  {id:8, code:'ART 130', t:'Digital Design Fundamentals', dept:'Art & Design', cr:3, inst:'Prof. K. Yamada',
+   sched:'F 1:00 PM – 3:50 PM', loc:'Design Studio B', cap:24, enr:20, prereq:'None',
+   desc:'Typography, color, and layout using industry tools (Figma and Adobe). Build a small portfolio site by the end of term — studio computers provided.'}
+];
+COURSES.forEach(c=>c.enr0=c.enr); // remember initial enrollment for demo reset
+
+/* ---------- Student club directory ---------- */
+const CLUB_MONO = {Academic:'#2E5AA8', Cultural:'#B45309', Arts:'#7C3AED', Athletic:'#C93B34', Service:'#0F7A4D', Hobby:'#0369A1'};
+const CLUBS = [
+  {id:1, n:'AI Builders Club', cat:'Academic', e:'🤖',
+   desc:'Weekly build nights where members ship real AI projects — chatbots, vision demos, hackathon entries. Beginners are paired with mentors; no coding experience required to start.',
+   meet:'Wed 6:00 PM · Tech Hall 115', contact:'aibuilders@btu.edu', mem:128},
+  {id:2, n:'Robotics Society', cat:'Academic', e:'🦾',
+   desc:'Design, build, and compete. Home of BTU\'s regional-champion combat bot "Bluebird." Open lab hours every weekend for members of any skill level.',
+   meet:'Sat 1:00 PM · Engineering Lab 2', contact:'robotics@btu.edu', mem:86},
+  {id:3, n:'Women in STEM', cat:'Academic', e:'🔬',
+   desc:'Mentorship circles, industry speaker nights, and an annual spring conference trip. Open to all students who support the mission.',
+   meet:'Thu 5:30 PM · Science 140', contact:'wistem@btu.edu', mem:143},
+  {id:4, n:'International Students Association', cat:'Cultural', e:'🌍',
+   desc:'Cultural festivals, weekly language-exchange tables, and the beloved World Food Night each November. A home base for international and globally curious students alike.',
+   meet:'Fri 5:00 PM · Student Union 210', contact:'isa@btu.edu', mem:210},
+  {id:5, n:'Salsa & Latin Dance Club', cat:'Cultural', e:'💃',
+   desc:'Free beginner lessons every week, monthly socials, and a performance team that travels to collegiate competitions. No partner or experience needed.',
+   meet:'Tue 7:00 PM · Rec Center Studio A', contact:'salsa@btu.edu', mem:95},
+  {id:6, n:'BTU Harmonics (A Cappella)', cat:'Arts', e:'🎤',
+   desc:'BTU\'s award-winning a cappella group, plus a no-audition community choir that rehearses alongside. Winter and spring showcases; auditions each September.',
+   meet:'Mon & Thu 7:00 PM · Music Hall 3', contact:'harmonics@btu.edu', mem:34},
+  {id:7, n:'Photography Club', cat:'Arts', e:'📷',
+   desc:'Weekly photo walks, darkroom access, and a juried spring exhibition in the library gallery. Club cameras available to borrow — phone photographers welcome too.',
+   meet:'Sun 3:00 PM · Arts Annex', contact:'photo@btu.edu', mem:67},
+  {id:8, n:'Outdoor Adventures Club', cat:'Athletic', e:'🏔️',
+   desc:'Monthly hiking and camping trips, climbing-wall nights, and a spring-break backpacking expedition. Gear library included with membership.',
+   meet:'Wed 8:00 PM · Rec Center Lobby', contact:'outdoors@btu.edu', mem:154},
+  {id:9, n:'BTU eSports', cat:'Athletic', e:'🎮',
+   desc:'Five varsity titles and casual community nights every Friday. Tryouts for competitive rosters each semester; everyone is welcome at open play.',
+   meet:'Fri 6:00 PM · eSports Arena', contact:'esports@btu.edu', mem:230},
+  {id:10, n:'Volunteer Corps', cat:'Service', e:'🤝',
+   desc:'Weekly service projects with local shelters, schools, and food banks. Logs verified service hours you can use for scholarships and grad school applications.',
+   meet:'Sat 9:00 AM · Student Union Lobby', contact:'volunteer@btu.edu', mem:176},
+  {id:11, n:'Chess & Strategy Games', cat:'Hobby', e:'♟️',
+   desc:'Casual boards always open, a rated ladder for the competitive, and board-game nights on the last Friday of each month.',
+   meet:'Tue 6:00 PM · Library Commons', contact:'chess@btu.edu', mem:58},
+  {id:12, n:'Culinary Club', cat:'Hobby', e:'🍳',
+   desc:'Hands-on cooking workshops, dorm-recipe challenges, and an annual chili cook-off. All skill levels — ingredients covered by dues.',
+   meet:'Sun 5:00 PM · Union Kitchen', contact:'cooking@btu.edu', mem:89}
+];
+
+/* ---------- Career Services job board ---------- */
+const JOB_TYPE_STYLE = {'Internship':['#E3E9FF','#2A3BAF'],'Co-op':['#F3E8FF','#7C3AED'],'Part-time':['#E1F5EA','#0F7A4D'],'Full-time':['#FFF2CE','#8A6400']};
+const JOBS = [
+  {id:1, t:'Software Engineering Intern (Summer 2027)', co:'BlueSky Cloud', i:'BC', col:'#2563EB', type:'Internship',
+   loc:'San Francisco, CA · Hybrid', pay:'$38/hr', posted:'Sep 1',
+   desc:'Join the platform team building developer tools used by 2,000+ engineers. Mentored 12-week program with a real product deliverable.',
+   skills:'Python · Git · Cloud basics'},
+  {id:2, t:'Data Analyst Co-op (Spring 2027)', co:'Nimbus Analytics', i:'NA', col:'#7C3AED', type:'Co-op',
+   loc:'Remote (US)', pay:'$30/hr', posted:'Sep 3',
+   desc:'Six-month co-op on the customer insights team: build dashboards, run A/B analyses, and present to stakeholders monthly.',
+   skills:'SQL · Excel · Tableau'},
+  {id:3, t:'Health IT Support Specialist', co:'Harbor Health', i:'HH', col:'#0D9488', type:'Part-time',
+   loc:'BlueSky City · On-site', pay:'$22/hr', posted:'Aug 30',
+   desc:'Support clinic staff with EHR systems 15–20 hrs/week. Flexible scheduling around classes; great fit for health informatics students.',
+   skills:'Troubleshooting · Customer service · HIPAA basics'},
+  {id:4, t:'Fintech Analyst (New Grad)', co:'Quantia Finance', i:'QF', col:'#B45309', type:'Full-time',
+   loc:'New York, NY', pay:'$85,000/yr', posted:'Sep 2',
+   desc:'Rotational analyst program across risk, payments, and product analytics. Starts July 2027; applications close Oct 15.',
+   skills:'Excel · SQL · Financial modeling'},
+  {id:5, t:'Game QA Tester', co:'Redwood Games', i:'RG', col:'#16A34A', type:'Part-time',
+   loc:'Remote', pay:'$20/hr', posted:'Aug 28',
+   desc:'Playtest unreleased titles, write reproducible bug reports, and join weekly triage calls. Evening and weekend shifts available.',
+   skills:'Attention to detail · Written communication'},
+  {id:6, t:'Supply Chain Intern', co:'Atlas Logistics', i:'AL', col:'#475569', type:'Internship',
+   loc:'Chicago, IL', pay:'$26/hr', posted:'Sep 4',
+   desc:'Optimize routing and inventory for a regional distribution network. Includes a capstone project presented to the VP of Operations.',
+   skills:'Excel · Data analysis · Operations'},
+  {id:7, t:'UX Design Intern', co:'Lumen Media', i:'LM', col:'#DB2777', type:'Internship',
+   loc:'Los Angeles, CA · Hybrid', pay:'$28/hr', posted:'Sep 5',
+   desc:'Work with the design system team on a consumer streaming app. Portfolio required; Figma exercise in the first round.',
+   skills:'Figma · Prototyping · User research'},
+  {id:8, t:'Embedded Systems Engineer (New Grad)', co:'Vertex Robotics', i:'VR', col:'#DC2626', type:'Full-time',
+   loc:'Austin, TX', pay:'$95,000/yr', posted:'Sep 1',
+   desc:'Firmware for warehouse robotics: sensor integration, motor control, and real-time debugging on shipping hardware.',
+   skills:'C/C++ · RTOS · Circuits'},
+  {id:9, t:'Library Student Assistant', co:'BTU Library (on campus)', i:'BL', col:'#1E2F7A', type:'Part-time',
+   loc:'On campus · Work-study eligible', pay:'$17/hr', posted:'Aug 26',
+   desc:'Front-desk service, shelving, and helping students with printers and study-room bookings. 8–12 hrs/week, schedule around classes.',
+   skills:'Reliability · Friendliness'}
+];
+
+/* ---------- Advisors & appointment slots ---------- */
+const ADVISORS = [
+  {n:'Lisa Nguyen', role:'Academic Advising', type:'Advising', focus:'Degree planning · Course selection · Registration holds'},
+  {n:'Jenny Kim',   role:'Academic Advising', type:'Advising', focus:'Transfer credits · Double majors · Graduation checks'},
+  {n:'Marcus Hill', role:'Career Services',   type:'Career',   focus:'Resume reviews · Internship search · Interview prep'},
+  {n:'Rachel Chen', role:'Career Services',   type:'Career',   focus:'Job-search strategy · Offer negotiation · LinkedIn'},
+  {n:'Kevin Wong',  role:'IT Help Desk',      type:'IT',       focus:'Accounts & passwords · Wi-Fi · Device support'}
+,
+  {n:'Emily Johnson',role:'Academic & Career Advising', type:'Advising', focus:'Degree planning · Appointment workflows · UAT lead'}
+];
+const TYPE_LABEL = {Advising:'Academic Advising', Career:'Career Services', IT:'IT Help Desk'};
+let SLOTS = [
+  {id:1, d:'Thu, Sep 3',  t:'10:30 AM', w:'Lisa Nguyen', type:'Advising', booked:false},
+  {id:2, d:'Fri, Sep 4',  t:'1:00 PM',  w:'Marcus Hill', type:'Career',   booked:false},
+  {id:3, d:'Mon, Sep 7',  t:'9:15 AM',  w:'Kevin Wong',  type:'IT',       booked:false},
+  {id:4, d:'Tue, Sep 8',  t:'3:30 PM',  w:'Lisa Nguyen', type:'Advising', booked:false},
+  {id:5, d:'Wed, Sep 9',  t:'11:00 AM', w:'Rachel Chen', type:'Career',   booked:false},
+  {id:6, d:'Thu, Sep 10', t:'2:00 PM',  w:'Jenny Kim',   type:'Advising', booked:false},
+  {id:7, d:'Fri, Sep 11', t:'10:00 AM', w:'Marcus Hill', type:'Career',   booked:false},
+  {id:8, d:'Fri, Sep 11', t:'4:00 PM',  w:'Kevin Wong',  type:'IT',       booked:false}
+,
+  {id:9,  d:'Mon, Sep 14', t:'2:00 PM',  w:'Emily Johnson', type:'Advising', booked:false},
+  {id:10, d:'Tue, Sep 15', t:'10:30 AM', w:'Emily Johnson', type:'Advising', booked:false}
+];
+
+/* Grounded FAQ corpus — the assistant answers ONLY from this (35+ campus topics). */
+const FAQ = [
+  {k:['register','registration','enroll','enrollment','class','classes','course','courses','waitlist','credits','swap','add class','drop a class','drop class'],
+   a:'Register directly in the Class Register tab: browse the Fall 2026 catalog, check seats and prerequisites, and click Register. Full courses offer a waitlist, and you can take up to 18 credits per semester. Drop or swap courses anytime from "My schedule" — drops before the add/drop deadline (Sep 4) never appear on your record.',
+   s:'BTU Registration Guide'},
+  {k:['advising','advisor','appointment','appointments','book','schedule a meeting','meet with'],
+   a:'Book Academic Advisor or Career Advisor appointments in the Appointments tab: pick an open slot and confirm — you can cancel anytime from "Confirmed." Walk-in advising is also available Tue/Thu 1–3 PM at the Advising Center.',
+   s:'Advising Center FAQ'},
+  {k:['career','job','jobs','internship','internships','co-op','coop','hiring','work-study','campus job','resume','interview','employment'],
+   a:'Career Services lives in the Careers tab: browse internship, co-op, part-time, and full-time listings and apply directly. Book a 1:1 Career Advisor session (resume review, mock interview) in the Appointments tab — and don\'t miss the Fall Career Fair on Sep 12.',
+   s:'Career Services Handbook'},
+  {k:['club','clubs','organization','organizations','join a club','student group'],
+   a:'Browse all student organizations in the Clubs tab — search by name or filter by category, and join instantly. You can also meet clubs in person at the Club Expo (Sep 3, on the Quad).',
+   s:'Student Life FAQ'},
+  {k:['event','events','activities','activity','happening','rsvp','what\'s on'],
+   a:'Academic, social, and wellness events are listed in the Events tab — searchable and filterable by category, with RSVP on every detail page. Career fairs and workshops are in the Careers tab together with the job board.',
+   s:'CampusConnect Events'},
+  {k:['tuition','pay','payment','bill','billing','bursar','installment'],
+   a:'Tuition payments are handled by the Bursar\'s Office (bursar@btu.edu, Hayes 100). Payment plans in four installments are available; the fall payment deadline is posted on your student account. CampusConnect does not process payments.',
+   s:'Bursar Office FAQ'},
+  {k:['ferpa','privacy','data','records','protected','personal information'],
+   a:'BTU protects student records under FERPA. CampusConnect\'s demo uses synthetic data only and never shares personal records — that\'s why this assistant redirects grade and transcript questions to the Registrar. To review or amend your records, contact registrar@btu.edu.',
+   s:'BTU FERPA Policy'},
+  {k:['fair','career fair','job fair'],
+   a:'The Fall Career Fair is Sep 12, 10:00 AM–4:00 PM in the Grand Hall — 60+ employers including BlueSky Cloud, Nimbus Analytics, Vertex Robotics, and Quantia Finance. Find the company list and RSVP under Careers → Upcoming career events. Bring printed resumes; on-the-spot interviews run 2–4 PM.',
+   s:'Career Services'},
+  {k:['help desk','helpdesk','wifi','wi-fi','password','laptop','tech support','it help','canvas','lms','email','account locked','reset'],
+   a:'The IT Help Desk supports accounts, password resets, campus Wi-Fi (network: BTU-Secure), email, Canvas/LMS access, and device issues. Book an IT Help Desk session with Kevin Wong in the Appointments tab, or email helpdesk@btu.edu.',
+   s:'IT Help Desk'},
+  {k:['library','study room','study rooms','quiet floor','borrow','checkout','reserve a room'],
+   a:'The BTU Library is open Mon–Thu 7 AM–midnight, Fri 7 AM–9 PM, weekends 9 AM–9 PM (24/7 during finals). Study rooms are bookable free at the front desk or the library site; laptops, chargers, and calculators can be borrowed for up to 4 hours with your student ID.',
+   s:'BTU Library Guide'},
+  {k:['print','printing','printer','scan','scanner','copy','copies'],
+   a:'Print stations are in the Library (floors 1–2) and the Student Union. Every student gets 100 free pages per semester; upload from any device via the web-print portal, then release the job with your student ID. Color printing is $0.25/page.',
+   s:'BTU Library Guide'},
+  {k:['dining','meal','meal plan','meals','cafeteria','food','eat','restaurant','food court'],
+   a:'The main Dining Hall serves 7 AM–9 PM daily; the Union Food Court runs 10 AM–8 PM. Meal plans: Blue (10 meals/week) and Sky (unlimited) — you can change plans during the first two weeks of the term at dining.btu.edu. Vegetarian, halal, and allergen-friendly stations at every meal.',
+   s:'Dining Services FAQ'},
+  {k:['housing','residence','dorm','dorms','dormitory','roommate','move-in','move in','res hall','maintenance request'],
+   a:'Housing applications and room selection run through the Housing portal. Roommate requests are honored when submitted by Jul 1. For maintenance issues, file a request at your hall\'s front desk or housing@btu.edu — urgent issues (water, heat, locks) get same-day response.',
+   s:'Housing & Residence Life'},
+  {k:['parking','permit','car','garage','citation','parking ticket'],
+   a:'Student parking permits are $45/semester, purchased online through Parking Services. Students park in Lots C and D; the garage is faculty/visitor only until 5 PM. Citation appeals must be filed within 14 days.',
+   s:'Parking Services'},
+  {k:['shuttle','bus','transit','transportation','commute','getting around'],
+   a:'The free campus shuttle runs 7 AM–10 PM every 15 minutes on the Blue Loop (dorms → academic quad → rec center → downtown). Live tracking is in the BTU mobile app, and your student ID gets a 50% discount on city buses.',
+   s:'Transportation Services'},
+  {k:['financial aid','fafsa','grant','grants','loan','loans','aid'],
+   a:'CampusConnect doesn\'t process financial aid. The Office of Financial Aid (finaid@btu.edu, Hayes 102, walk-ins 9–4) handles FAFSA, grants, loans, and emergency funds — the FAFSA priority deadline for next year is Mar 1. For payment plans, see the Bursar instead.',
+   s:'Financial Aid Office'},
+  {k:['scholarship','scholarships','merit award'],
+   a:'The BTU scholarship portal opens each October: one application covers merit, departmental, and donor awards. Essays are due Jan 15, and awards post with your spring aid package. Current students are eligible — GPA requirements vary by award.',
+   s:'Financial Aid Office'},
+  {k:['health','clinic','sick','doctor','nurse','immunization','flu shot','insurance'],
+   a:'The Student Health Center takes walk-ins 8 AM–5 PM weekdays (nurse line after hours: 555-010-2100). Visits are free with the health fee; labs and prescriptions are billed to insurance. Immunization records are due before your first term.',
+   s:'Student Health Services'},
+  {k:['counseling','counselor','therapy','stress','stressed','anxiety','anxious','depressed','burnout','worried','mental health','overwhelmed'],
+   a:'Counseling & Wellness offers free, confidential sessions (up to 6 per semester) — book at the Wellness Center or 555-010-4357. Drop-in "Let\'s Talk" hours run Tue/Wed afternoons, and a 24/7 crisis line is available at the same number. Mindfulness sessions are listed in the Events tab.',
+   s:'Counseling & Wellness'},
+  {k:['recreation','rec center','gym','fitness','workout','swim','pool','basketball','intramural','sports'],
+   a:'The Rec Center is open 6 AM–11 PM with your student ID: gym, pool, courts, and free group fitness classes. Intramural leagues (soccer, basketball, volleyball, flag football) sign up in early September — solo sign-ups are matched to teams.',
+   s:'Campus Recreation'},
+  {k:['bookstore','textbook','textbooks','course materials'],
+   a:'The campus bookstore (Union, ground floor) price-matches major retailers and rents most titles. Order online for in-store pickup, and sell books back during finals week. Digital course materials are delivered through Canvas.',
+   s:'BTU Bookstore'},
+  {k:['student id','id card','lost id','my id','replacement card','card office'],
+   a:'Your BTU ID is your key to the library, rec center, dining, and printing. Lost cards are replaced at the Card Office (Union 110) for $15 — lost cards are deactivated instantly, so report them right away.',
+   s:'Card Services'},
+  {k:['deadline','deadlines','academic calendar','add/drop','add drop','last day','finals','semester','break','holiday'],
+   a:'Key Fall 2026 dates: classes Aug 24 – Dec 11; add/drop ends Sep 4; course withdrawal deadline Oct 30; fall break Oct 12–13; Thanksgiving Nov 25–27; finals Dec 7–11. The full academic calendar is on the Registrar site.',
+   s:'Registrar — Academic Calendar'},
+  {k:['tutor','tutoring','study help','writing center','math lab','academic support'],
+   a:'Free peer tutoring runs through the Academic Success Center (Library 300) — drop-in for math and sciences, appointments for everything else. The Writing Center reviews drafts at any stage, and the Math Lab is open daily 10 AM–8 PM.',
+   s:'Academic Success Center'},
+  {k:['disability','accommodation','accommodations','accessibility','extended time'],
+   a:'Accessibility Services arranges academic accommodations (extended testing time, note-taking support, accessible housing). Register once with documentation at access@btu.edu; accommodations then apply to all your courses. Faculty are notified automatically — your diagnosis stays private.',
+   s:'Accessibility Services'},
+  {k:['international','visa','i-20','sevis','opt','cpt'],
+   a:'The International Student Office advises on visas, I-20s, SEVIS, and on-campus work rules (20 hrs/week max during term). Complete check-in each semester, and talk to an ISO advisor before any enrollment change — it can affect your status. Contact: intloffice@btu.edu.',
+   s:'International Student Office'},
+  {k:['major','minor','change major','declare','undeclared','switch major'],
+   a:'Declare or change your major through an Academic Advisor appointment (Appointments tab) — most majors are open to switch until junior year; some (Nursing, CS) require a minimum GPA. Minors need 18 credits and a one-page form.',
+   s:'Advising Center FAQ'},
+  {k:['graduation','graduate','commencement','degree audit','cap and gown'],
+   a:'Apply to graduate by Feb 15 for spring commencement (May 15). Run a degree audit with your advisor first to confirm requirements — book in the Appointments tab. Cap-and-gown orders open in March at the bookstore.',
+   s:'Registrar'},
+  {k:['safety','police','emergency','escort','alert','unsafe'],
+   a:'Campus Safety operates 24/7: emergencies 555-010-9111, non-emergency 555-010-9100. Free safety escorts anywhere on campus after dark, blue-light phones on every quad, and emergency alerts by text (enroll in the BTU app).',
+   s:'Campus Safety'},
+  {k:['lost and found','lost my','found an item','left my'],
+   a:'The central Lost & Found is at the Student Union info desk (9 AM–7 PM). Items with a BTU ID are automatically emailed to the owner; everything is held 30 days. For items lost on the shuttle, call Transportation at 555-010-7300.',
+   s:'Student Union'},
+  {k:['orientation','welcome week','new student','first year'],
+   a:'Welcome Week runs Aug 24–28: the Mixer (Aug 25), Club Expo (Sep 3), and Course Registration Q&A (Aug 28) are all in the Events tab — RSVP from each detail page. New-student advising holds clear after you meet your advisor.',
+   s:'Student Life'},
+  {k:['study abroad','exchange','global program'],
+   a:'Global Programs (Union 220) runs semester exchanges and summer programs in 30+ countries. Applications close Nov 1 for spring and Apr 1 for fall; financial aid travels with you and dedicated scholarships are available.',
+   s:'Global Programs'},
+  {k:['withdraw','withdrawal','leave of absence','take a semester off'],
+   a:'Withdrawing from a single course is done in Class Register before Oct 30 (a W appears on the transcript but doesn\'t affect GPA). For a full-semester withdrawal or leave of absence, meet an Academic Advisor first — it affects aid, housing, and international status.',
+   s:'Registrar'},
+  {k:['hello','hi','hey','good morning','good afternoon','help','what can you do','who are you'],
+   a:'Hi! I answer from approved BTU content across 30+ topics: classes, events, careers, appointments, clubs, housing, dining, parking, library, health, counseling, financial aid, IT, safety, and more. I can also summarize your own schedule and bookings — try "What is my schedule?"',
+   s:'CampusConnect Assistant'},
+  {k:['thanks','thank you','thx','appreciate'],
+   a:'You\'re welcome! Anything else — classes, events, appointments, or campus services — just ask.',
+   s:'CampusConnect Assistant'}
+];
+const REFUSAL = 'I don\'t have verified information about that in my approved knowledge base, so I won\'t guess. Try asking about classes, events, careers, appointments, clubs, housing, dining, parking, the library, health and counseling, financial aid, IT help, or campus safety — or contact Student Services at help@btu.edu / (555) 010-2000.';
+
+/* ---------- State ---------- */
+let state = { user:null, myCourses:[], acting:false, rsvps:new Set(), joined:new Set(), applied:new Set(), myAppts:[] };
+
+/* ---------- Auth ---------- */
+function login(){
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const pw = document.getElementById('pw').value;
+  const m = document.getElementById('loginMsg');
+  m.className = 'msg';
+  if(!email || !pw){ m.className='msg err'; m.textContent='Please enter both email and password.'; return; }
+  const u = USERS[email];
+  if(!u || u.pw !== pw){ m.className='msg err'; m.textContent='Invalid email or password. (Demo: jamie.torres@btu.edu / demo1234)'; return; }
+  state.user = { email, name:u.name, major:u.major, year:u.year, role:u.role||'student', title:u.title };
+  document.getElementById('view-login').classList.add('hidden');
+  document.getElementById('appShell').classList.remove('hidden');
+  document.getElementById('topName').textContent = u.name;
+  document.getElementById('topMeta').textContent = u.title || (u.major + ' · ' + u.year);
+  applyAvatar(document.getElementById('topAvatar'));
+  applyRole(u.role||'student');
+  document.getElementById('aiLaunch').classList.remove('hidden');
+  greeted = false; AI_HISTORY = [];
+  const cl0 = document.getElementById('chatlog'); if(cl0) cl0.innerHTML = '';
+  renderChips();
+  const rhome = ROLE_HOME[u.role||'student'] || 'home';
+  scrollTop();
+  show(rhome, document.querySelector('.snav button[data-view="'+rhome+'"]'));
+  requestAnimationFrame(scrollTop);   /* after the shell paints */
+}
+function logout(){
+  state = { user:null, myCourses:[], acting:false, rsvps:new Set(), joined:new Set(), applied:new Set(), myAppts:[] };
+  COURSES.forEach(c=>c.enr=c.enr0);
+  SLOTS.forEach(s=>s.booked=false);
+  resetRoleData();
+  document.getElementById('appShell').classList.add('hidden');
+  document.getElementById('aiLaunch').classList.add('hidden');
+  document.getElementById('aiPanel').classList.add('hidden');
+  document.getElementById('aiBack').classList.add('hidden');
+  unlockPage();
+  AI_HISTORY = [];
+  document.getElementById('view-login').classList.remove('hidden');
+  scrollTop();
+  document.getElementById('loginMsg').className='msg';
+  document.getElementById('chatlog').innerHTML='';
+  greeted=false;
+}
+
+/* ---------- Navigation ---------- */
+const TITLES = {home:'My Dashboard', events:'Event Directory', reg:'Class Registration', clubs:'Student Clubs', careers:'Career Services', appts:'Appointments', assistant:'Campus Assistant', clubmgmt:'Club Management', exec:'Executive Dashboard', itops:'IT Governance', advisor:'Advisor Console', budget:'Budget & ROI', security:'Security & Compliance'};
+function scrollTop(){
+  window.scrollTo(0, 0);
+  if(document.documentElement) document.documentElement.scrollTop = 0;
+  if(document.body) document.body.scrollTop = 0;
+  const mc = document.querySelector('.maincol'); if(mc) mc.scrollTop = 0;
+}
+function show(view, btn){
+  document.querySelectorAll('main > section').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('view-'+view).classList.remove('hidden');
+  document.querySelectorAll('.snav button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const pt = document.getElementById('pageTitle'); if(pt) pt.textContent = TITLES[view]||'CampusConnect';
+  if(view==='home') renderDash();
+  if(view==='events') renderEvents();
+  if(view==='reg') renderCourses();
+  if(view==='clubs') renderClubs();
+  if(view==='careers') renderJobs();
+  if(view==='appts') renderSlots();
+  if(view==='clubmgmt') renderClubMgmt();
+  if(view==='exec') renderExec();
+  if(view==='itops') renderItops();
+  if(view==='advisor') renderAdvisor();
+  if(view==='budget') renderBudget();
+  if(view==='security') renderSecurity();
+  scrollTop();
+  if(view==='assistant') greet();
+  refreshStats();
+}
+function navTo(view){ show(view, document.querySelector('.snav button[data-view="'+view+'"]')); }
+function refreshStats(){
+  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('statReg', state.myCourses.filter(x=>x.status==='Registered').length);
+  set('statSaved', state.rsvps.size);
+  set('statAppts', state.myAppts.length);
+}
+
+/* ---------- Events ---------- */
+function esc(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+function renderEvents(){
+  const q = document.getElementById('evSearch').value.trim().toLowerCase();
+  const cat = document.getElementById('evCat').value;
+  const list = EVENTS.filter(e =>
+    e.c!=='Career' &&
+    (!cat || e.c===cat) &&
+    (!q || (e.t+' '+e.desc+' '+e.loc).toLowerCase().includes(q))
+  );
+  const g = document.getElementById('evGrid');
+  g.innerHTML = list.map(e =>
+    `<div class="event" role="link" tabindex="0" onclick="openEvent(${e.id})" onkeydown="if(event.key==='Enter')openEvent(${e.id})">
+       <span class="codetag">${esc(e.m)} ${esc(e.dd)}</span>
+       <span class="cdept">${esc(e.c)}</span>
+       <h3>${esc(e.t)}</h3>
+       <div class="meta">${esc(e.loc)} · ${esc(e.time)}</div>
+       <div class="meta">${esc(e.desc)}</div>
+       ${state.rsvps.has(e.id)?'<div><span class="cat reg">Registered</span></div>':''}
+       <div class="more">View details ›</div>
+     </div>`).join('');
+  document.getElementById('evEmpty').classList.toggle('hidden', list.length>0);
+}
+
+/* ---------- Event detail page ---------- */
+function openEvent(id){
+  const e = EVENTS.find(x=>x.id===id);
+  if(!e) return;
+  const th = CAT_THEME[e.c];
+  let html = `
+    <div class="detail-hero" style="background:${th.g}">
+      <div class="deco"></div><div class="deco2"></div>
+      <h1>${esc(e.t)}</h1>
+      <div class="chips2">
+        <span>${esc(e.d)}</span><span>${esc(e.time)}</span>
+        <span>${esc(e.loc)}</span><span>${esc(e.c)}</span>
+      </div>
+    </div>
+    <div class="card about">
+      <h2>About this event</h2>
+      ${e.long.map(p=>`<p>${esc(p)}</p>`).join('')}
+    </div>`;
+  if(e.hl && e.hl.length){
+    html += `<div class="card"><h2>What to expect</h2><div class="hl-grid">${
+      e.hl.map(h=>`<div class="hl"><span class="ic"></span><div><b>${esc(h[1])}</b><span>${esc(h[2])}</span></div></div>`).join('')
+    }</div></div>`;
+  }
+  if(e.companies && e.companies.length){
+    html += `<div class="card"><h2>${esc(e.coTitle||'Who will be there')}</h2><div class="co-grid">${
+      e.companies.map(co=>`<div class="co"><div class="logo" style="background:${co.col}">${esc(co.i)}</div><div><b>${esc(co.n)}</b><span>${esc(co.roles)}</span></div></div>`).join('')
+    }</div><p class="sub" style="margin-top:12px">Logos and organizations shown are illustrative demo data.</p></div>`;
+  }
+  html += `<div class="card">
+    <div class="msg" id="rsvpMsg"></div>
+    <div id="rsvpArea">${rsvpControls(e.id)}</div>
+  </div>`;
+  document.getElementById('eventDetailBody').innerHTML = html;
+  document.querySelectorAll('main > section').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('view-eventDetail').classList.remove('hidden');
+  const origin = e.c==='Career' ? 'careers' : 'events';
+  const bk = document.getElementById('evBack');
+  bk.setAttribute('onclick', "navTo('"+origin+"')");
+  bk.textContent = origin==='careers' ? '← Career Services' : '← All events';
+  document.querySelectorAll('.snav button').forEach(b=>b.classList.remove('active'));
+  const evBtn = document.querySelector('.snav button[data-view="'+origin+'"]');
+  if(evBtn) evBtn.classList.add('active');
+  const pt2 = document.getElementById('pageTitle'); if(pt2) pt2.textContent = 'Event Details';
+  window.scrollTo({top:0});
+}
+function rsvpControls(id){
+  const reg = state.rsvps.has(id);
+  return (reg
+    ? `<span class="regbadge">Registered ✓</span>
+       <button class="btn cancel" onclick="rsvp(${id})">Cancel RSVP</button>`
+    : `<button class="btn" onclick="rsvp(${id})">RSVP to this event</button>`)
+    + `<button class="btn ghost" style="margin-left:10px" onclick="navTo('events')">Back to all events</button>`;
+}
+function rsvp(id){
+  const e = EVENTS.find(x=>x.id===id);
+  const m = document.getElementById('rsvpMsg');
+  if(state.rsvps.has(id)){
+    state.rsvps.delete(id);
+    m.className='msg err';
+    m.textContent = `Your RSVP for "${e.t}" has been cancelled. You can register again anytime.`;
+  } else {
+    state.rsvps.add(id);
+    m.className='msg ok';
+    m.textContent = `You're on the list for "${e.t}" (${e.d}, ${e.time}). A confirmation was sent to ${state.user ? state.user.email : 'your BTU email'}.`;
+  }
+  document.getElementById('rsvpArea').innerHTML = rsvpControls(id);
+}
+
+/* ---------- Class registration (double-click protected) ---------- */
+function myCredits(){
+  return state.myCourses.filter(x=>x.status==='Registered')
+    .reduce((n,x)=> n + COURSES.find(c=>c.id===x.id).cr, 0);
+}
+function myEntry(id){ return state.myCourses.find(x=>x.id===id); }
+function renderCourses(){
+  const q = (document.getElementById('crSearch').value||'').trim().toLowerCase();
+  const dept = document.getElementById('crDept').value;
+  const list = COURSES.filter(c =>
+    (!dept || c.dept===dept) &&
+    (!q || (c.code+' '+c.t+' '+c.inst+' '+c.desc).toLowerCase().includes(q))
+  );
+  document.getElementById('courseCards').innerHTML = list.map(c => {
+    const mine = myEntry(c.id);
+    const left = c.cap - c.enr;
+    let action;
+    if(mine){
+      action = mine.status==='Registered'
+        ? `<button class="btn block soft" onclick="drop(${c.id})">Drop course</button>`
+        : `<button class="btn block wl" onclick="drop(${c.id})">Waitlisted — remove</button>`;
+    } else if(left <= 0){
+      action = `<button class="btn block wl" onclick="enroll(${c.id})">Full — join waitlist</button>`;
+    } else {
+      action = `<button class="btn block" onclick="enroll(${c.id})">Register</button>`;
+    }
+    return `<div class="ccard">
+      <span class="codetag">${esc(c.code)}</span>
+      <span class="cdept">${esc(c.dept)}</span>
+      <h3>${esc(c.t)}</h3>
+      <div class="cinst">${esc(c.inst)} · ${c.cr} credits · Prereq: ${esc(c.prereq)}</div>
+      <div class="iboxes">
+        <div class="ibox"><span>Schedule</span><b>${esc(c.sched)}</b></div>
+        <div class="ibox"><span>Seats</span><b>${left>0 ? left+' available' : 'Full — waitlist open'}</b></div>
+      </div>
+      <div class="cdesc2">${esc(c.desc)}</div>
+      ${action}
+    </div>`;
+  }).join('');
+  const sc = document.getElementById('selCount'); if(sc) sc.textContent = state.myCourses.length + ' registered';
+  document.getElementById('crEmpty').classList.toggle('hidden', list.length>0);
+  renderMySchedule();
+  refreshStats();
+}
+function renderMySchedule(){
+  const rows = state.myCourses.map(x => {
+    const c = COURSES.find(k=>k.id===x.id);
+    return `<tr><td data-label="Code"><b>${esc(c.code)}</b></td><td data-label="Course">${esc(c.t)}</td><td data-label="Schedule">${esc(c.sched)}</td><td data-label="Credits">${c.cr}</td>
+      <td data-label="Status"><span class="pill ${x.status==='Registered'?'open':'wait'}">${x.status}</span></td>
+      <td data-label=""><button class="btn small ghost" onclick="drop(${c.id})">Drop</button></td></tr>`;
+  });
+  document.getElementById('regRows').innerHTML = rows.length ? rows.join('')
+    : '<tr><td colspan="6" class="sub">No courses yet.</td></tr>';
+  const wl = state.myCourses.filter(x=>x.status==='Waitlisted').length;
+  document.getElementById('credTotal').textContent = rows.length
+    ? `Total: ${myCredits()} of ${MAX_CREDITS} credits registered${wl?` · ${wl} waitlisted`:''}.` : '';
+}
+function enroll(id){
+  if(state.acting) return;               // guard against rapid double-clicks (fix for defect D-03)
+  state.acting = true;
+  try{
+    const c = COURSES.find(x=>x.id===id);
+    const m = document.getElementById('regMsg');
+    if(!c || myEntry(id)) return;
+    if(c.enr < c.cap && myCredits() + c.cr > MAX_CREDITS){
+      m.className='msg err';
+      m.textContent = `Cannot register for ${c.code}: it would put you at ${myCredits()+c.cr} credits (max ${MAX_CREDITS}). Drop a course first.`;
+      return;
+    }
+    if(c.enr >= c.cap){
+      state.myCourses.push({id:c.id, status:'Waitlisted'});
+      m.className='msg ok';
+      m.textContent = `${c.code} is full — you've been added to the waitlist. We'll email ${state.user.email} if a seat opens.`;
+    } else {
+      c.enr++;
+      state.myCourses.push({id:c.id, status:'Registered'});
+      m.className='msg ok';
+      m.textContent = `Registered: ${c.code} ${c.t} (${c.cr} credits, ${c.sched}). A confirmation was sent to ${state.user.email}.`;
+    }
+    renderCourses();
+  } finally { state.acting = false; }
+}
+function drop(id){
+  const c = COURSES.find(x=>x.id===id);
+  const entry = myEntry(id);
+  if(!c || !entry) return;
+  if(entry.status==='Registered') c.enr = Math.max(0, c.enr-1);
+  state.myCourses = state.myCourses.filter(x=>x.id!==id);
+  const m = document.getElementById('regMsg');
+  m.className='msg ok';
+  m.textContent = `${c.code} ${entry.status==='Registered'?'dropped — the seat is open again':'removed from your waitlist'}.`;
+  renderCourses();
+}
+
+/* ---------- Club directory ---------- */
+function renderClubs(){
+  const q = (document.getElementById('clSearch').value||'').trim().toLowerCase();
+  const cat = document.getElementById('clCat').value;
+  const list = CLUBS.filter(c =>
+    (!cat || c.cat===cat) &&
+    (!q || (c.n+' '+c.desc+' '+c.meet).toLowerCase().includes(q))
+  );
+  document.getElementById('clubCards').innerHTML = list.map(c => {
+    const joined = state.joined.has(c.id);
+    return `<div class="club">
+      <span class="codetag">${c.mem + (joined?1:0)} members</span>
+      <span class="cdept">${esc(c.cat)}</span>
+      <h3>${esc(c.n)}</h3>
+      <div class="cdesc">${esc(c.desc)}</div>
+      <div class="iboxes">
+        <div class="ibox"><span>Meets</span><b>${esc(c.meet)}</b></div>
+        <div class="ibox"><span>Contact</span><b>${esc(c.contact)}</b></div>
+      </div>
+      <div class="foot">${c.active===false
+        ? `<span class="codetag">Paused by Student Government</span>`
+        : joined
+        ? `<span class="cat reg">Member</span><button class="btn small cancel" onclick="toggleClub(${c.id})">Leave</button>`
+        : `<button class="btn small" onclick="toggleClub(${c.id})">Join club</button>`}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('clEmpty').classList.toggle('hidden', list.length>0);
+}
+function toggleClub(id){
+  const c = CLUBS.find(x=>x.id===id);
+  const m = document.getElementById('clubMsg');
+  if(state.joined.has(id)){
+    state.joined.delete(id);
+    m.className='msg err';
+    m.textContent = `You've left ${c.n}. You can rejoin anytime.`;
+  } else {
+    state.joined.add(id);
+    m.className='msg ok';
+    m.textContent = `Welcome to ${c.n}! The club officers were notified and a welcome email was sent to ${state.user ? state.user.email : 'your BTU email'}. First meeting: ${c.meet}.`;
+  }
+  renderClubs();
+}
+
+/* ---------- Career Services job board ---------- */
+function renderJobs(){
+  renderAdvisors('advListCareers','Career');
+  const q = (document.getElementById('jbSearch').value||'').trim().toLowerCase();
+  const ty = document.getElementById('jbType').value;
+  const list = JOBS.filter(j =>
+    (!ty || j.type===ty) &&
+    (!q || (j.t+' '+j.co+' '+j.desc+' '+j.loc+' '+j.skills).toLowerCase().includes(q))
+  );
+  document.getElementById('jobCards').innerHTML = list.map(j => {
+    const applied = state.applied.has(j.id);
+    return `<div class="job">
+      <span class="codetag">${esc(j.type)}</span>
+      <span class="cdept">${esc(j.co)}</span>
+      <h3>${esc(j.t)}</h3>
+      ${applied?'<div><span class="cat reg">Applied</span></div>':''}
+      <div class="iboxes">
+        <div class="ibox"><span>Location</span><b>${esc(j.loc)}</b></div>
+        <div class="ibox"><span>Pay</span><b>${esc(j.pay)}</b></div>
+      </div>
+      <div class="jdesc">${esc(j.desc)}</div>
+      <div class="jmeta">Skills: ${esc(j.skills)} · Posted ${esc(j.posted)}</div>
+      <div class="foot">${applied
+        ? `<button class="btn small cancel" onclick="toggleApply(${j.id})">Withdraw application</button>`
+        : `<button class="btn small" onclick="toggleApply(${j.id})">Apply</button>`}
+        <button class="btn small ghost" onclick="navTo('appts')">Prep with an advisor</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('jbEmpty').classList.toggle('hidden', list.length>0);
+  document.getElementById('careerEvGrid').innerHTML = EVENTS.filter(e=>e.c==='Career').map(e =>
+    `<div class="event" role="link" tabindex="0" onclick="openEvent(${e.id})" onkeydown="if(event.key==='Enter')openEvent(${e.id})">
+       <span class="codetag">${esc(e.m)} ${esc(e.dd)}</span>
+       <span class="cdept">${esc(e.c)}</span>
+       <h3>${esc(e.t)}</h3>
+       <div class="meta">${esc(e.loc)} · ${esc(e.time)}</div>
+       <div class="meta">${esc(e.desc)}</div>
+       ${state.rsvps.has(e.id)?'<div><span class="cat reg">Registered</span></div>':''}
+       <div class="more">View details ›</div>
+     </div>`).join('');
+}
+function toggleApply(id){
+  const j = JOBS.find(x=>x.id===id);
+  const m = document.getElementById('careerMsg');
+  if(state.applied.has(id)){
+    state.applied.delete(id);
+    m.className='msg err';
+    m.textContent = `Application withdrawn: ${j.t} at ${j.co}. You can re-apply anytime before the posting closes.`;
+  } else {
+    state.applied.add(id);
+    m.className='msg ok';
+    m.textContent = `Application submitted: ${j.t} at ${j.co}! A confirmation was sent to ${state.user ? state.user.email : 'your BTU email'}. Tip: book a Career Advisor in Appointments to prep for the interview.`;
+  }
+  renderJobs();
+}
+
+/* ---------- Appointments (Academic & Career Advisors) ---------- */
+function renderAdvisors(targetId, typeFilter){
+  const el = document.getElementById(targetId);
+  if(!el) return;
+  el.innerHTML = ADVISORS.filter(a=>!typeFilter||a.type===typeFilter).map(a =>
+    `<div class="hl"><div class="cmono" style="background:#13234B">${esc(a.n.split(' ').map(x=>x[0]).join(''))}</div><div><b>${esc(a.n)} — ${esc(a.role)}</b><span>${esc(a.focus)}</span></div></div>`).join('');
+}
+function renderSlots(){
+  const ty = document.getElementById('apType').value;
+  const list = SLOTS.filter(s => !ty || s.type===ty);
+  document.getElementById('slotRows').innerHTML = list.map(s => `
+    <div class="arow">
+      <div class="ainfo"><b>${TYPE_LABEL[s.type]||s.type}</b><span>${esc(s.w)}</span></div>
+      <div class="awhen">${s.d} · ${s.t}</div>
+      ${s.booked
+        ? '<span class="bookedpill">Booked</span>'
+        : `<button class="btn small" onclick="book(${s.id})">Book</button>`}
+    </div>`).join('');
+  const mine = state.myAppts;
+  const box = document.getElementById('confBox');
+  if(mine.length){
+    box.classList.remove('hidden');
+    document.getElementById('confList').innerHTML = mine.map(s => `
+      <div class="confrow">
+        <span class="ckmark">✓</span>
+        <div><b>${TYPE_LABEL[s.type]||s.type}</b><span>${esc(s.w)} · ${s.d} · ${s.t}</span></div>
+        <a class="cancel-link" onclick="cancelAppt(${s.id})">Cancel</a>
+      </div>`).join('');
+  } else {
+    box.classList.add('hidden');
+  }
+  refreshStats();
+}
+function book(id){
+  if(state.acting) return;               // double-click guard (defect D-03 fix)
+  state.acting = true;
+  try{
+    const s = SLOTS.find(x=>x.id===id);
+    const m = document.getElementById('apptMsg');
+    if(!s || s.booked){ m.className='msg err'; m.textContent='Sorry, that slot was just taken. Please pick another.'; renderSlots(); return; }
+    s.booked = true;
+    state.myAppts.push(s);
+    m.className='msg ok';
+    m.textContent = `Booked: ${TYPE_LABEL[s.type]||s.type} with ${s.w} on ${s.d} at ${s.t}. A confirmation was sent to ${state.user ? state.user.email : 'your BTU email'}.`;
+    renderSlots();
+  } finally { state.acting = false; }
+}
+function cancelAppt(id){
+  const s = SLOTS.find(x=>x.id===id);
+  if(s){ s.booked=false; state.myAppts = state.myAppts.filter(x=>x.id!==id); }
+  const m = document.getElementById('apptMsg');
+  m.className='msg ok'; m.textContent='Appointment cancelled — the slot is open again.';
+  renderSlots();
+}
+
+/* ---------- Stakeholder roles & workspaces ---------- */
+const ROLE_HOME = {student:'home', president:'home', sponsor:'exec', it:'itops', advisor:'advisor', cfo:'budget', security:'security'};
+function pickId(email){
+  document.getElementById('email').value = email;
+  document.getElementById('pw').value = 'demo1234';
+  document.querySelectorAll('.idcard').forEach(b=>b.classList.toggle('sel', b.dataset.email===email));
+}
+function applyRole(role){
+  document.querySelectorAll('.snav button').forEach(b=>{
+    const roles = (b.dataset.roles||'').split(',');
+    b.classList.toggle('hidden', !roles.includes(role));
+  });
+}
+
+/* --- Club management (Student Government President) --- */
+function renderClubMgmt(){
+  document.getElementById('mgmtList').innerHTML = CLUBS.map(c=>`
+    <div class="arow">
+      <div class="ainfo" style="flex:1"><b>${esc(c.n)}${c.custom?' <span class="codetag">New</span>':''}</b><span>${esc(c.cat)} · ${c.mem+(state.joined.has(c.id)?1:0)} members · ${esc(c.meet)}</span></div>
+      ${c.active===false?'<span class="codetag">Paused</span>':'<span class="cat reg">Active</span>'}
+      <button class="btn small ghost" onclick="toggleClubActive(${c.id})">${c.active===false?'Reactivate':'Pause'}</button>
+    </div>`).join('');
+}
+function createClub(){
+  const n = document.getElementById('ncName').value.trim();
+  const cat = document.getElementById('ncCat').value;
+  const meet = document.getElementById('ncMeet').value.trim();
+  const mail = document.getElementById('ncMail').value.trim();
+  const desc = document.getElementById('ncDesc').value.trim();
+  const m = document.getElementById('ncMsg');
+  if(!n || !desc){ m.className='msg err'; m.textContent='Please give the club at least a name and a one-sentence description.'; return; }
+  CLUBS.push({id:Math.max(...CLUBS.map(c=>c.id))+1, n, cat, e:'✨', desc, meet:meet||'TBD — first meeting to be announced', contact:mail||'studentlife@btu.edu', mem:1, custom:true, active:true});
+  m.className='msg ok';
+  m.textContent = `"${n}" is now live in the student club directory. A bylaws template was sent to ${mail||'studentlife@btu.edu'}.`;
+  ['ncName','ncMeet','ncMail','ncDesc'].forEach(i=>document.getElementById(i).value='');
+  renderClubMgmt();
+}
+function toggleClubActive(id){
+  const c = CLUBS.find(x=>x.id===id); if(!c) return;
+  c.active = c.active===false;
+  renderClubMgmt();
+}
+
+/* --- Executive dashboard (Sponsor) --- */
+function renderExec(){
+  const kpis = [
+    ['Budget consumed','$1,840','of $5,000 committed · 36.8%',37,''],
+    ['Board demo','14 days','away · day 46 of 60',77,'gold'],
+    ['Pilot testers','40','target met · $46 per tester',100,''],
+    ['Student NPS','+21 pts','baseline 31 → 52 · target +20 met',100,'gold']
+  ];
+  document.getElementById('execKpis').innerHTML = kpis.map(k=>
+    `<div class="dstat" style="cursor:default"><span class="eyebrow">${k[0]}</span><b>${k[1]}</b><span class="dsub">${k[2]}</span><div class="kpibar"><i class="${k[4]}" style="width:${k[3]}%"></i></div></div>`).join('');
+  const feats = [
+    ['ok','Unified login & student dashboard','live in the demo build'],
+    ['ok','Class registration with live seat counts','live in the demo build'],
+    ['ok','Event directory + RSVP','live in the demo build'],
+    ['ok','Appointment booking with advisor confirmation','live in the demo build'],
+    ['ok','Grounded AI assistant','answers from approved FAQs only'],
+    ['warn','Mobile-responsive pass','Sprint 4 — in progress'],
+    ['warn','Club directory polish','Sprint 4 — in progress']
+  ];
+  document.getElementById('execChecklist').innerHTML = feats.map(f=>
+    `<div class="checkrow"><span class="ckdot ${f[0]}">${f[0]==='ok'?'✓':'…'}</span><div style="font-size:.9rem"><b>${f[1]}</b> <span style="color:var(--muted)">— ${f[2]}</span></div></div>`).join('');
+  const digest = [
+    ['Accomplishments','Sprint 3 closed at 30 of 30 story points; advisor-confirmed booking flow shipped; security review passed with no findings.'],
+    ['Upcoming','Mobile-responsive pass and club directory polish (Sprint 4); full dress rehearsal of the Board demo next Friday.'],
+    ['Risks','Timeline remains the top risk — mitigated by a frozen MVP scope. No budget risk: 36.8% consumed at day 46.'],
+    ['Decisions needed','Confirm which three user journeys you want featured live in the Board demo.']
+  ];
+  document.getElementById('execDigest').innerHTML = digest.map(d=>
+    `<div class="checkrow"><div style="font-size:.9rem"><b>${d[0]}.</b> <span style="color:var(--muted)">${d[1]}</span></div></div>`).join('');
+}
+
+/* --- IT governance (IT Director) --- */
+let PROMO_REQS = [
+  {id:1, pkg:'Sprint 3 · Advisor-confirmed booking flow', by:'Dev team · PR #47',
+   checks:{'Unit tests':true,'Human code review':true,'Security scan':true,'Penetration test':true,'FERPA compliance':true}, status:'pending'},
+  {id:2, pkg:'Sprint 3 · AI assistant grounding update', by:'AI Lead · PR #49',
+   checks:{'Unit tests':true,'Human code review':true,'Security scan':true,'Penetration test':false,'FERPA compliance':true}, status:'pending'},
+  {id:3, pkg:'Sprint 2 · Class registration + waitlist', by:'Dev team · PR #41',
+   checks:{'Unit tests':true,'Human code review':true,'Security scan':true,'Penetration test':true,'FERPA compliance':true}, status:'approved'}
+];
+function renderItops(){
+  const staged = PROMO_REQS.filter(r=>r.status==='approved').length;
+  const steps = [
+    ['Development','All feature branches building green — AI-generated code quarantined here until reviewed.','on'],
+    ['Staging', staged+' package'+(staged===1?'':'s')+' promoted. Credential-gated: requires engineering sign-off.', staged?'on':''],
+    ['Production','Locked until Board demo acceptance and final security review.','']
+  ];
+  document.getElementById('pipeSteps').innerHTML = steps.map(s=>`<div class="pipestep ${s[2]}"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('');
+  document.getElementById('reqList').innerHTML = PROMO_REQS.map(r=>{
+    const allOk = Object.values(r.checks).every(Boolean);
+    return `<div class="arow">
+      <div class="ainfo" style="flex:1"><b>${r.pkg}</b><span>${r.by}</span>
+        <div class="reqchecks">${Object.entries(r.checks).map(([k,v])=>`<em class="${v?'':'no'}">${v?'✓':'✕'} ${k}</em>`).join('')}</div>
+      </div>
+      ${r.status==='pending'
+        ? `<button class="btn small" ${allOk?'':'disabled style="opacity:.45;cursor:not-allowed" title="All checks must pass first"'} onclick="decideReq(${r.id},true)">Grant staging access</button>
+           <button class="btn small cancel" onclick="decideReq(${r.id},false)">Send back</button>`
+        : r.status==='approved' ? '<span class="cat reg">Promoted to staging</span>' : '<span class="codetag">Returned to dev</span>'}
+    </div>`;
+  }).join('');
+  const sec = [
+    'PII masking 100% — sandbox runs on mock data only',
+    'No student data is sent to external AI models',
+    'Prompt-injection test suite: 24 of 24 passed',
+    'P95 latency 1.6s — within the &lt;2.0s Definition of Done',
+    'University branding audit passed'
+  ];
+  document.getElementById('secList').innerHTML = sec.map(s=>`<div class="checkrow"><span class="ckdot ok">✓</span><div style="font-size:.9rem">${s}</div></div>`).join('');
+}
+function decideReq(id, ok){
+  const r = PROMO_REQS.find(x=>x.id===id);
+  if(!r || r.status!=='pending') return;
+  if(ok && !Object.values(r.checks).every(Boolean)) return;
+  r.status = ok ? 'approved' : 'returned';
+  const m = document.getElementById('itMsg');
+  m.className = 'msg ' + (ok?'ok':'err');
+  m.textContent = ok
+    ? `Staging credentials granted for "${r.pkg}" — engineering sign-off recorded in the audit log.`
+    : `"${r.pkg}" returned to development. Failing checks must pass before staging access is reconsidered.`;
+  renderItops();
+}
+
+/* --- Advisor console (Advisor) --- */
+let ADV_REQS = [
+  {id:1, who:'Jamie Torres',  topic:'Degree planning — adding a CS minor', when:'Mon, Sep 14 · 2:00 PM', status:'pending'},
+  {id:2, who:'Tracy K.',     topic:'Registration hold — needs clearance before add/drop', when:'Tue, Sep 15 · 10:30 AM', status:'pending'},
+  {id:3, who:'Jordan P.',    topic:'Internship credit approval', when:'Thu, Sep 17 · 1:30 PM', status:'pending'}
+];
+const ADV_BLOCKS0 = [
+  {id:1, d:'Mon, Sep 14', t:'2:00 PM – 4:00 PM'},
+  {id:2, d:'Tue, Sep 15', t:'10:00 AM – 12:00 PM'},
+  {id:3, d:'Thu, Sep 17', t:'1:00 PM – 3:00 PM'}
+];
+let ADV_BLOCKS = ADV_BLOCKS0.map(b=>({...b}));
+function renderAdvisor(){
+  initTimeSelects();
+  document.getElementById('advReqs').innerHTML = ADV_REQS.map(r=>`
+    <div class="arow">
+      <div class="ainfo" style="flex:1"><b>${esc(r.who)}</b><span>${esc(r.topic)}</span></div>
+      <div class="awhen">${r.when}</div>
+      ${r.status==='pending'
+        ? `<div style="display:flex;gap:8px;align-items:center;flex-wrap:nowrap"><button class="btn small" onclick="decideAdv(${r.id},true)">Accept</button><button class="btn small cancel" onclick="decideAdv(${r.id},false)">Decline</button></div>`
+        : r.status==='accepted' ? '<span class="cat reg">Confirmed</span>' : '<span class="codetag">Declined</span>'}
+    </div>`).join('') || '<p class="sub">No pending requests.</p>';
+  document.getElementById('advBlocks').innerHTML = ADV_BLOCKS.map(b=>`
+    <div class="arow">
+      <div class="ainfo" style="flex:1"><b>${esc(b.d)}</b><span>${esc(b.t)}</span></div>
+      <span class="cat reg">Open to students</span>
+      <button class="btn small ghost" onclick="removeBlock(${b.id})">Close block</button>
+    </div>`).join('') || '<p class="sub">No open blocks — students cannot book you until you open one.</p>';
+}
+function decideAdv(id, ok){
+  const r = ADV_REQS.find(x=>x.id===id); if(!r || r.status!=='pending') return;
+  r.status = ok ? 'accepted' : 'declined';
+  const m = document.getElementById('advMsg');
+  m.className = 'msg ' + (ok?'ok':'err');
+  m.textContent = ok
+    ? `Confirmed: ${r.who}, ${r.when}. The student has been notified by email.`
+    : `Declined — ${r.who} was asked to choose another open block. The rest of your calendar stays private.`;
+  renderAdvisor();
+}
+function fmtMin(min){
+  const h = Math.floor(min/60), m = min%60;
+  const ap = h >= 12 ? 'PM' : 'AM';
+  let hh = h % 12; if(hh === 0) hh = 12;
+  return hh + ':' + String(m).padStart(2,'0') + ' ' + ap;
+}
+function initTimeSelects(){
+  const s = document.getElementById('abStart'), e = document.getElementById('abEnd');
+  if(!s || s.options.length) return;
+  for(let min = 8*60; min <= 18*60; min += 30){
+    s.add(new Option(fmtMin(min), min));
+    e.add(new Option(fmtMin(min), min));
+  }
+  s.value = String(14*60);   // 2:00 PM
+  e.value = String(16*60);   // 4:00 PM
+}
+function addBlock(){
+  const m = document.getElementById('advMsg');
+  const dv = document.getElementById('abDay').value;
+  const s = parseInt(document.getElementById('abStart').value, 10);
+  const e = parseInt(document.getElementById('abEnd').value, 10);
+  if(!dv){ m.className='msg err'; m.textContent='Please pick a date from the calendar first.'; return; }
+  if(!(e > s)){ m.className='msg err'; m.textContent='End time must be after start time.'; return; }
+  const d = new Date(dv + 'T00:00:00').toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+  const t = fmtMin(s) + ' – ' + fmtMin(e);
+  if(ADV_BLOCKS.some(b => b.d === d && b.t === t)){ m.className='msg err'; m.textContent='That block is already open.'; return; }
+  ADV_BLOCKS.push({id:Math.max(0,...ADV_BLOCKS.map(b=>b.id))+1, d, t});
+  m.className='msg ok'; m.textContent='Open block published: ' + d + ', ' + t + '. Students can now request this time.';
+  document.getElementById('abDay').value = '';
+  renderAdvisor();
+}
+function removeBlock(id){ ADV_BLOCKS = ADV_BLOCKS.filter(b=>b.id!==id); renderAdvisor(); }
+
+/* --- Budget & ROI (CFO) --- */
+const BURN = [
+  ['Week 1','AI development tooling & licenses',420],
+  ['Week 2','Sandbox hosting & environments',310],
+  ['Week 3','Usability-testing incentives (40 pilot students)',265],
+  ['Week 4','Security & penetration scan tooling',335],
+  ['Week 5','Hosting, monitoring & backups',290],
+  ['Week 6','Board demo preparation materials',220]
+];
+function renderBudget(){
+  const spent = BURN.reduce((n,b)=>n+b[2],0);
+  const avg = Math.round(spent/BURN.length);
+  const kpis = [
+    ['Committed budget','$5,000','fixed — no increase requested',100,'gold'],
+    ['Spent to date','$'+spent.toLocaleString(), (spent/5000*100).toFixed(1)+'% consumed at day 46', Math.round(spent/5000*100),''],
+    ['Avg weekly burn','$'+avg,'trending flat week over week',Math.round(avg/833*100),''],
+    ['Forecast at launch','$2,760','44.8% under budget',55,'gold']
+  ];
+  document.getElementById('cfoKpis').innerHTML = kpis.map(k=>
+    `<div class="dstat" style="cursor:default"><span class="eyebrow">${k[0]}</span><b>${k[1]}</b><span class="dsub">${k[2]}</span><div class="kpibar"><i class="${k[4]}" style="width:${k[3]}%"></i></div></div>`).join('');
+  const max = Math.max(...BURN.map(b=>b[2]));
+  document.getElementById('burnRows').innerHTML = BURN.map(b=>`
+    <div class="arow">
+      <div class="ainfo" style="flex:1"><b>${b[0]} — $${b[2]}</b><span>${b[1]}</span>
+        <div class="kpibar" style="max-width:340px"><i style="width:${Math.round(b[2]/max*100)}%"></i></div></div>
+    </div>`).join('');
+  const roi = [
+    'Faculty scheduling admin reduced by an estimated 120 hours per semester (≈ $4,800/yr in staff time)',
+    'Student NPS up 21 points (baseline 31 → 52) — engagement supports retention and enrollment',
+    '40 pilot testers onboarded at $46 per tester — acquisition target met',
+    'AI assistant deflects 63% of routine FAQ traffic away from staff inboxes'
+  ];
+  document.getElementById('roiList').innerHTML = roi.map(s=>`<div class="checkrow"><span class="ckdot ok">✓</span><div style="font-size:.9rem">${s}</div></div>`).join('');
+}
+
+/* --- Security & compliance (Cybersecurity Officer) --- */
+function renderSecurity(){
+  const kpis = [
+    ['FERPA violations','0','since project start',100,'gold'],
+    ['PII masking','100%','across every log stream',100,''],
+    ['Data sent to AI models','None','mock data only, on-device',100,''],
+    ['Open incidents','0','halt protocol never triggered',100,'gold']
+  ];
+  document.getElementById('secKpis').innerHTML = kpis.map(k=>
+    `<div class="dstat" style="cursor:default"><span class="eyebrow">${k[0]}</span><b>${k[1]}</b><span class="dsub">${k[2]}</span><div class="kpibar"><i class="${k[4]}" style="width:${k[3]}%"></i></div></div>`).join('');
+  const inv = [
+    ['Student name & email','Mock demo accounts only','Masked in all logs','Never sent to AI models'],
+    ['Course selections','Stored on this device only','Session-scoped','Never sent to AI models'],
+    ['Appointment metadata','Advisor + time only, no notes','Masked in all logs','Never sent to AI models'],
+    ['Grades & academic records','NOT collected','Least-information principle','Excluded from the portal entirely']
+  ];
+  document.getElementById('dataInv').innerHTML = inv.map(r=>`
+    <div class="arow">
+      <div class="ainfo" style="flex:1"><b>${r[0]}</b><span>${r[1]}</span></div>
+      <div class="reqchecks"><em>✓ ${r[2]}</em><em>✓ ${r[3]}</em></div>
+    </div>`).join('');
+  const audit = [
+    ['ok','FERPA policy mapping document — reviewed and current'],
+    ['ok','Access-control review — role-based views verified this sprint'],
+    ['ok','Prompt-injection test report — 24 of 24 scenarios passed'],
+    ['ok','Incident-response runbook — halt protocol documented and rehearsed'],
+    ['warn','Government-audit dry run — scheduled ahead of launch']
+  ];
+  document.getElementById('auditList').innerHTML = audit.map(a=>
+    `<div class="checkrow"><span class="ckdot ${a[0]}">${a[0]==='ok'?'✓':'…'}</span><div style="font-size:.9rem">${a[1]}</div></div>`).join('');
+}
+function spotCheck(){
+  const m = document.getElementById('secMsg');
+  m.className = 'msg ok';
+  m.textContent = 'Spot-check passed: 0 PII exposures found in 128 sampled log lines. Result appended to the audit trail.';
+}
+
+/* --- My profile (all identities) --- */
+function applyAvatar(el){
+  if(!el) return;
+  const u = state.user;
+  if(u && u.photo){ el.innerHTML = '<img src="'+u.photo+'" alt="Profile photo">'; }
+  else { el.textContent = (u ? u.name : '?').split(' ').filter(Boolean).map(x=>x[0]).join('').slice(0,3).toUpperCase(); }
+}
+function openProfile(){
+  if(!state.user) return;
+  document.getElementById('pfName').value = state.user.name || '';
+  document.getElementById('pfTitle').value = state.user.title || ((state.user.major||'') + (state.user.year ? ' · ' + state.user.year : ''));
+  document.getElementById('pfEmail').value = state.user.contact || state.user.email || '';
+  document.getElementById('pfPhone').value = state.user.phone || '';
+  document.getElementById('pfMsg').className = 'msg';
+  document.getElementById('pfFile').value = '';
+  applyAvatar(document.getElementById('pfAvatar'));
+  document.getElementById('profileModal').classList.remove('hidden');
+}
+function closeProfile(){ document.getElementById('profileModal').classList.add('hidden'); }
+function pfPhoto(ev){
+  const f = ev.target.files && ev.target.files[0];
+  const m = document.getElementById('pfMsg');
+  if(!f) return;
+  if(!f.type || !f.type.startsWith('image/')){ m.className='msg err'; m.textContent='Please choose an image file (PNG, JPG, …).'; return; }
+  if(f.size > 4*1024*1024){ m.className='msg err'; m.textContent='Image is larger than 4 MB — please pick a smaller one.'; return; }
+  const r = new FileReader();
+  r.onload = e => {
+    state.user.photo = e.target.result;
+    applyAvatar(document.getElementById('pfAvatar'));
+    applyAvatar(document.getElementById('topAvatar'));
+    m.className='msg ok'; m.textContent='Photo updated — it stays on this device only.';
+  };
+  r.readAsDataURL(f);
+}
+function pfClearPhoto(){
+  if(!state.user) return;
+  delete state.user.photo;
+  applyAvatar(document.getElementById('pfAvatar'));
+  applyAvatar(document.getElementById('topAvatar'));
+}
+function saveProfile(){
+  const m = document.getElementById('pfMsg');
+  const n = document.getElementById('pfName').value.trim();
+  if(!n){ m.className='msg err'; m.textContent='Display name cannot be empty.'; return; }
+  state.user.name = n;
+  const t = document.getElementById('pfTitle').value.trim();
+  if(t) state.user.title = t;
+  state.user.contact = document.getElementById('pfEmail').value.trim();
+  state.user.phone = document.getElementById('pfPhone').value.trim();
+  document.getElementById('topName').textContent = n;
+  document.getElementById('topMeta').textContent = state.user.title || '';
+  applyAvatar(document.getElementById('topAvatar'));
+  m.className='msg ok'; m.textContent='Profile saved for this session.';
+  setTimeout(closeProfile, 800);
+}
+
+function resetRoleData(){
+  PROMO_REQS.forEach(r=>r.status = r.id===3 ? 'approved' : 'pending');
+  ADV_REQS.forEach(r=>r.status='pending');
+  ADV_BLOCKS = ADV_BLOCKS0.map(b=>({...b}));
+  for(let i=CLUBS.length-1;i>=0;i--){ if(CLUBS[i].custom) CLUBS.splice(i,1); else CLUBS[i].active = true; }
+}
+
+/* ---------- Grounded AI Assistant ---------- */
+let greeted = false;
+const BOTFACE = '';
+const ROLE_HELLO = {
+  student:   'Ask me about your classes, appointments, clubs, or anything else you need help with.',
+  president: 'I can help with student advocacy, club management, and making the case for the features students want.',
+  sponsor:   'I can help with demo prep, project health, stakeholder messaging, and your NPS target.',
+  cfo:       'I can help with budget burn, ROI framing, and the value metrics worth reporting.',
+  it:        'I can help with code review gates, AI-code security, and integration risk.',
+  security:  'I can help with FERPA obligations, data inventory, and audit preparation.',
+  advisor:   'I can help with booking requests, protecting your calendar, and advising prep.'
+};
+function greet(){
+  if(greeted) return; greeted = true;
+  const nm = state.user ? ' ' + state.user.name.split(' ')[0] : '';
+  const role = (state.user && state.user.role) || 'student';
+  bot('Hi' + nm + '. ' + (ROLE_HELLO[role] || ROLE_HELLO.student) +
+      (AI_KEY ? '' : ' Tip: connect a Gemini API key with the gear icon above to unlock open-ended answers.'),
+      AI_KEY ? null : 'Built-in campus knowledge');
+}
+function scrollChat(){
+  const log = document.getElementById('chatlog');
+  if(!log) return;
+  requestAnimationFrame(()=>{ log.scrollTop = log.scrollHeight; });
+}
+function row(cls, inner){
+  const log = document.getElementById('chatlog');
+  const r = document.createElement('div'); r.className='msgrow '+cls;
+  r.innerHTML = (cls==='bot'?BOTFACE:'') + inner;
+  log.appendChild(r);
+  scrollChat();
+  return r;
+}
+function bot(text, src){
+  scrollChat();
+  row('bot', `<div class="bubble bot"><span class="bname">CampusConnect</span>${fmtBot(text)}${src?`<span class="src">Source: ${esc(src)}</span>`:''}</div>`);
+}
+function fmtBot(t){
+  return esc(t)
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+    .replace(/^[\-\*] (.+)$/gm, '• $1')
+    .replace(/\n/g, '<br>');
+}
+function personalAnswer(q){
+  const s = q.toLowerCase();
+  if(!/\bmy\b|am i (taking|enrolled|registered|booked)/.test(s)) return false;
+  const SRC = 'Your CampusConnect account';
+  if(/(course|class|schedule|credit)/.test(s)){
+    if(!state.myCourses.length){ bot('You\'re not enrolled in any courses yet. Head to the Class Registration tab to browse the Fall 2026 catalog — you can take up to '+MAX_CREDITS+' credits.', SRC); return true; }
+    const lines = state.myCourses.map(x=>{ const c=COURSES.find(k=>k.id===x.id); return c.code+' '+c.t+' ('+c.cr+' cr, '+x.status+', '+c.sched+')'; });
+    bot('You have '+state.myCourses.length+' course(s): '+lines.join(' • ')+'. Registered credits: '+myCredits()+' of '+MAX_CREDITS+'.', SRC); return true;
+  }
+  if(/(appointment|advisor|booking)/.test(s)){
+    if(!state.myAppts.length){ bot('You have no appointments booked. Open the Appointments tab to book an Academic Advisor or Career Advisor session.', SRC); return true; }
+    const lines = state.myAppts.map(a=>(TYPE_LABEL[a.type]||a.type)+' with '+a.w+' on '+a.d+' at '+a.t);
+    bot('You have '+state.myAppts.length+' appointment(s): '+lines.join(' • ')+'. You can cancel from the Appointments tab.', SRC); return true;
+  }
+  if(/club/.test(s)){
+    if(!state.joined.size){ bot('You haven\'t joined any clubs yet. Browse the Clubs tab — most clubs welcome complete beginners.', SRC); return true; }
+    const lines = [...state.joined].map(id=>{ const c=CLUBS.find(k=>k.id===id); return c.n+' ('+c.meet+')'; });
+    bot('You\'re a member of '+state.joined.size+' club(s): '+lines.join(' • ')+'.', SRC); return true;
+  }
+  if(/(application|applied|job)/.test(s)){
+    if(!state.applied.size){ bot('You haven\'t applied to any jobs yet. Check the Careers tab — '+JOBS.length+' positions are currently listed.', SRC); return true; }
+    const lines = [...state.applied].map(id=>{ const j=JOBS.find(k=>k.id===id); return j.t+' at '+j.co; });
+    bot('You\'ve applied to '+state.applied.size+' position(s): '+lines.join(' • ')+'. Tip: book a Career Advisor to prep for interviews.', SRC); return true;
+  }
+  if(/(event|rsvp)/.test(s)){
+    if(!state.rsvps.size){ bot('You haven\'t RSVP\'d to any events yet. Browse the Events tab, or see career events under Careers.', SRC); return true; }
+    const lines = [...state.rsvps].map(id=>{ const e=EVENTS.find(k=>k.id===id); return e.t+' ('+e.d+', '+e.loc+')'; });
+    bot('You\'re registered for '+state.rsvps.size+' event(s): '+lines.join(' • ')+'.', SRC); return true;
+  }
+  return false;
+}
+const PRIVACY_RE = /(grade|gpa|transcript|ssn|social security|account balance|financial aid|student record|my records)/;
+let outage = false;
+function toggleOutage(){
+  outage = !outage;
+  greeted = true;
+  updateAiSub();
+  bot(outage
+    ? 'Heads up: the AI service just went offline (simulated). I will keep answering from cached approved content, and every other page — classes, events, appointments — still works. This is the demo-day resilience plan in action.'
+    : 'The AI service is back online. Full grounded answers restored.', outage ? 'Offline fallback — cached content' : 'System status');
+}
+function answer(q){
+  if(PRIVACY_RE.test(q.toLowerCase())){
+    bot('For your privacy, I can\'t access or discuss student records like grades, GPA, transcripts, or account balances here. Please use the Registrar\'s secure portal or visit the Registrar\'s Office with your student ID.', 'Privacy — records redirect');
+    return;
+  }
+  if(outage && /\bmy\b/.test(q.toLowerCase())){
+    bot('Live account lookups are unavailable while the assistant is offline. Cached campus FAQs still work — or check your tabs directly.', 'Offline fallback — cached content');
+    return;
+  }
+  if(personalAnswer(q)) return;
+  const SYN = {dorm:'housing', dorms:'housing', cafeteria:'dining', lunch:'dining', dinner:'dining', breakfast:'dining',
+    gymnasium:'recreation', money:'tuition', cost:'tuition', fees:'tuition', sick:'health', ill:'health',
+    sad:'counseling', lonely:'counseling', homesick:'counseling', prof:'professor', wifi:'wifi'};
+  const stem = w => w.length>4 ? w.replace(/(ings?|ers?|ies|es|s|ed)$/,'') : w;
+  const raw = q.toLowerCase();
+  const words = raw.replace(/[^a-z0-9\s-]/g,'').split(/\s+/).filter(Boolean).map(w=>SYN[w]||w);
+  const stems = words.map(stem);
+  let best=null, bestScore=0;
+  for(const f of FAQ){
+    let score=0;
+    for(const k of f.k){
+      if(k.includes(' ') || k.includes('-')){
+        if(raw.includes(k)) score += 3;              // multi-word phrase: strongest signal
+      } else if(words.includes(k)){
+        score += 2;                                   // exact word match
+      } else {
+        const ks = stem(k);
+        if(stems.some(ws => ws===ks || (ws.length>3 && ks.length>3 && (ws.startsWith(ks) || ks.startsWith(ws))))){
+          score += 1;                                 // stemmed/prefix match (classes ~ class, stressed ~ stress)
+        }
+      }
+    }
+    if(score > bestScore){ bestScore=score; best=f; }
+  }
+  // confidence threshold: needs at least one solid match, else refuse (no guessing)
+  if(!best || bestScore < 2){ bot(REFUSAL, 'Out-of-scope policy'); return; }
+  bot(best.a, best.s);
+}
+async function send(){
+  const inp = document.getElementById('chatIn');
+  const q = inp.value.trim();
+  if(!q || aiBusy) return;
+  row('user', `<div class="bubble user">${esc(q)}</div>`);
+  inp.value = '';
+  const t = row('bot', '<div class="bubble bot"><span class="typing"><i></i><i></i><i></i></span></div>');
+  if(!AI_KEY || outage){
+    setTimeout(()=>{ t.remove(); answer(q); }, 550);
+    return;
+  }
+  aiBusy = true;
+  const btn = document.getElementById('aiSendBtn'); if(btn) btn.disabled = true;
+  try{
+    const reply = await callGemini(q);
+    t.remove();
+    AI_HISTORY.push({role:'user', parts:[{text:q}]}, {role:'model', parts:[{text:reply}]});
+    if(AI_HISTORY.length > 20) AI_HISTORY.splice(0, AI_HISTORY.length - 20);
+    bot(reply);
+  }catch(err){
+    t.remove();
+    bot('I could not reach Gemini (' + (err && err.message ? err.message : 'unknown error') + '). Falling back to built-in campus knowledge for this one.', 'Fallback');
+    answer(q);
+  }finally{
+    aiBusy = false;
+    if(btn) btn.disabled = false;
+  }
+}
+function ask(q){
+  const p = document.getElementById('aiPanel');
+  if(p.classList.contains('hidden')) openAI();       /* only open when closed — avoids relayout on every chip tap */
+  document.getElementById('chatIn').value = q;
+  send();
+}
+
+/* ---------- Gemini-powered assistant (floating widget) ---------- */
+/* Model candidates, newest first. If one is unavailable to your key the
+   assistant automatically falls back to the next and remembers the winner. */
+const AI_MODELS = ['gemini-3.6-flash','gemini-3.5-flash-lite','gemini-flash-latest','gemini-2.5-flash'];
+let AI_MODEL = AI_MODELS[0];
+try { const sm = localStorage.getItem('cc_gemini_model'); if(sm) AI_MODEL = sm; } catch(e){}
+
+/* =====================================================================
+   OPTIONAL: paste a Gemini API key between the quotes below to ship the
+   demo with the assistant already connected — no one has to type a key.
+   Leave it empty ('') and the assistant still works from the built-in
+   campus knowledge base.
+   SECURITY: a key placed here is visible to anyone who opens the page or
+   the repository. Do NOT commit a real key to a public GitHub repo — for
+   public hosting, leave this empty and enter the key via the gear icon.
+   ===================================================================== */
+const BUILTIN_KEY = '';
+
+let AI_HISTORY = [];
+let aiBusy = false;
+let USER_KEY = '';
+try { USER_KEY = localStorage.getItem('cc_gemini_key') || ''; } catch(e){ USER_KEY = ''; }
+/* a key typed by the user always wins over the built-in one */
+let AI_KEY = USER_KEY || BUILTIN_KEY;
+
+function isMobileAI(){ return window.matchMedia('(max-width:640px)').matches; }
+const ROLE_CHIPS = {
+  student: [
+    ['My schedule',      'What is my class schedule this term?'],
+    ['Drop a class',     'How do I drop a class before the deadline?'],
+    ['My appointments',  'What appointments do I have booked?'],
+    ['Club ideas',       'Which clubs would suit me based on what I am studying?'],
+    ['Plan my week',     'Help me plan a study week around my current schedule.']
+  ],
+  president: [
+    ['Student concerns', 'What are the most common complaints students have about campus services?'],
+    ['Pitch a feature',  'Help me make the case for adding a social feed and ride-sharing to CampusConnect.'],
+    ['Club health',      'How can I tell whether a student club is thriving or should be paused?'],
+    ['Grow membership',  'Give me three low-cost ideas to increase club sign-ups this semester.'],
+    ['Draft an update',  'Draft a short update to the student body about the CampusConnect launch.']
+  ],
+  sponsor: [
+    ['Board demo',       'What should I show the Board of Trustees in the first two minutes of the demo?'],
+    ['Project health',   'Summarize the current project health: budget, timeline, and top risks.'],
+    ['NPS target',       'How do we measure whether we hit the 20% NPS improvement target?'],
+    ['Talking points',   'Give me three talking points that justify continued funding for CampusConnect.'],
+    ['Risks',            'What is the biggest risk to launching on day 60, and how do we mitigate it?']
+  ],
+  cfo: [
+    ['Burn rate',        'Summarize the current budget burn rate and forecast at launch.'],
+    ['ROI case',         'What is the return on investment case for CampusConnect in plain numbers?'],
+    ['Cost per student', 'What does this pilot cost per student, and how does that compare to alternatives?'],
+    ['Cost risks',       'What could still cause this project to exceed the $5,000 cap?'],
+    ['Value metrics',    'Which metrics should I ask the team to report weekly to prove value?']
+  ],
+  it: [
+    ['Review queue',     'What is pending in the staging approval queue right now?'],
+    ['AI code risks',    'What are the main security risks of AI-generated code, and how do we control them?'],
+    ['Review checklist', 'Give me a code review checklist for promoting a build to staging.'],
+    ['Prompt injection', 'How do we test an AI assistant for prompt-injection vulnerabilities?'],
+    ['Integration risk', 'What are the risks of integrating with the Student Information System in 60 days?']
+  ],
+  security: [
+    ['FERPA check',      'What FERPA obligations apply to a student portal like CampusConnect?'],
+    ['Data inventory',   'What student data does this MVP hold, and how is it protected?'],
+    ['Audit prep',       'Help me prepare an audit evidence checklist for this project.'],
+    ['Least data',       'How do we apply the least-information principle to advisor access?'],
+    ['Incident plan',    'Draft a short incident-response plan for a suspected data leak.']
+  ],
+  advisor: [
+    ['My requests',      'What booking requests are waiting for my response?'],
+    ['Protect my time',  'How should I structure my open advising blocks to protect focused work time?'],
+    ['Advising prep',    'How do I prepare for a degree-planning appointment with a student?'],
+    ['Registration hold','How do I explain a registration hold to a student and help them clear it?'],
+    ['Email template',   'Draft a friendly email declining a booking request and offering other times.']
+  ]
+};
+function renderChips(){
+  const box = document.getElementById('aiChips');
+  if(!box) return;
+  const role = (state.user && state.user.role) || 'student';
+  const list = ROLE_CHIPS[role] || ROLE_CHIPS.student;
+  box.innerHTML = list.map(c =>
+    `<button onclick="ask(${JSON.stringify(c[1]).replace(/"/g,'&quot;')})">${esc(c[0])}</button>`).join('');
+}
+function toggleAI(){
+  const p = document.getElementById('aiPanel');
+  if(p.classList.contains('hidden')) openAI(); else closeAI();
+}
+function openAI(){
+  document.getElementById('aiPanel').classList.remove('hidden');
+  const mob = isMobileAI();
+  document.getElementById('aiBack').classList.toggle('hidden', !mob);
+  document.getElementById('aiLaunch').classList.toggle('hidden', mob);
+  if(mob) lockPage();
+  updateAiSub();
+  renderChips();
+  greet();
+  if(!mob) setTimeout(()=>{ const i = document.getElementById('chatIn'); if(i) i.focus(); }, 60);
+}
+function closeAI(){
+  document.getElementById('aiPanel').classList.add('hidden');
+  document.getElementById('aiBack').classList.add('hidden');
+  closeKeyPanel();
+  unlockPage();
+  if(state.user) document.getElementById('aiLaunch').classList.remove('hidden');
+}
+let pageScrollY = 0, pageLocked = false;
+function lockPage(){
+  if(pageLocked) return;
+  pageLocked = true;
+  pageScrollY = window.scrollY || window.pageYOffset || 0;
+  const b = document.body;
+  b.style.position = 'fixed';
+  b.style.top = (-pageScrollY) + 'px';
+  b.style.left = '0';
+  b.style.right = '0';
+  b.style.width = '100%';
+  b.style.overflow = 'hidden';
+}
+function unlockPage(){
+  if(!pageLocked) return;
+  pageLocked = false;
+  const b = document.body;
+  b.style.position = ''; b.style.top = ''; b.style.left = '';
+  b.style.right = ''; b.style.width = ''; b.style.overflow = '';
+  window.scrollTo(0, pageScrollY);
+}
+function updateAiSub(){
+  const sub = document.getElementById('aiSub');
+  const note = document.getElementById('aiModelNote');
+  if(sub) sub.textContent = outage ? 'Simulated outage — cached answers only'
+    : AI_KEY ? (USER_KEY ? 'Connected to Gemini (your key)' : 'Connected to Gemini (built-in key)')
+    : 'Built-in knowledge — connect Gemini for open questions';
+  if(note) note.innerHTML = (AI_KEY ? 'Model: ' + esc(AI_MODEL) + ' · ' : 'No API key · ')
+    + '<a onclick="toggleOutage()">' + (outage ? 'restore service' : 'simulate outage') + '</a>';
+  const sel = document.getElementById('aiModelSel');
+  if(sel && !sel.options.length){
+    AI_MODELS.forEach(m => sel.add(new Option(m, m)));
+  }
+  if(sel) sel.value = AI_MODEL;
+}
+function openKeyPanel(){
+  const box = document.getElementById('aiKeyBox');
+  box.classList.remove('hidden');
+  box.scrollTop = 0;
+  document.getElementById('aiKeyIn').value = USER_KEY;
+  const src = document.getElementById('aiKeySrc');
+  if(src) src.textContent = USER_KEY
+    ? 'Currently using the key you saved in this browser.'
+    : BUILTIN_KEY ? 'Currently using the key built into this build — save your own below to override it.'
+    : 'No key connected — answers come from the built-in campus knowledge base.';
+}
+function closeKeyPanel(){ document.getElementById('aiKeyBox').classList.add('hidden'); }
+function saveKey(){
+  const v = document.getElementById('aiKeyIn').value.trim();
+  USER_KEY = v;
+  AI_KEY = USER_KEY || BUILTIN_KEY;
+  try { v ? localStorage.setItem('cc_gemini_key', v) : localStorage.removeItem('cc_gemini_key'); } catch(e){}
+  closeKeyPanel(); updateAiSub();
+  bot(AI_KEY
+    ? (v ? 'Gemini connected with your key. Ask me anything now — including questions outside the campus knowledge base.'
+         : 'Your key was removed, so I switched back to the key built into this build. Open-ended answers still work.')
+    : 'Key removed. I will keep answering from the built-in campus knowledge base.',
+    AI_KEY ? null : 'Built-in campus knowledge');
+}
+function clearKey(){ document.getElementById('aiKeyIn').value = ''; saveKey(); }
+function pickModel(m){
+  AI_MODEL = m;
+  try { localStorage.setItem('cc_gemini_model', m); } catch(e){}
+  updateAiSub();
+}
+
+function aiContext(){
+  const u = state.user;
+  const who = u ? `${u.name} (${u.title || ((u.major||'') + ' · ' + (u.year||''))}), role: ${u.role}` : 'a guest';
+  const courses = state.myCourses.length
+    ? state.myCourses.map(x=>{ const c = COURSES.find(k=>k.id===x.id); return `${c.code} ${c.t} — ${c.sched}, ${c.cr} cr, ${x.status}`; }).join('; ')
+    : 'none yet';
+  const appts = state.myAppts.length
+    ? state.myAppts.map(s=>`${TYPE_LABEL[s.type]||s.type} with ${s.w} on ${s.d} at ${s.t}`).join('; ')
+    : 'none booked';
+  const clubs = state.joined.size
+    ? [...state.joined].map(id=>{ const c = CLUBS.find(k=>k.id===id); return c ? c.n : ''; }).filter(Boolean).join('; ')
+    : 'none joined';
+  const rsvps = state.rsvps.size
+    ? [...state.rsvps].map(id=>{ const e = EVENTS.find(k=>k.id===id); return e ? `${e.t} (${e.d}, ${e.time})` : ''; }).filter(Boolean).join('; ')
+    : 'none';
+  return `You are the CampusConnect assistant for BlueSky Technology University (BTU), a demo student-services portal.
+
+You are speaking with: ${who}.
+Their registered courses: ${courses}.
+Their appointments: ${appts}.
+Clubs joined: ${clubs}.
+Events saved: ${rsvps}.
+Credit limit per semester: ${MAX_CREDITS}.
+
+Campus facts you may use: the portal has Class Registration (Fall 2026 catalog with live seat counts and waitlists), an Event Directory with RSVP, Career Services, Appointments with advisors (Academic Advising, Career Services, IT Help Desk), and a Student Club Directory.
+
+How to answer:
+- Be helpful and direct. You may answer ANY question, including topics unrelated to campus.
+- Keep replies short — usually 2-4 sentences. Use a short bullet list only when it genuinely helps.
+- When the question is about this student's own courses, appointments, clubs, or events, answer from the data above.
+- This is a demo running on mock data. Never invent grades, GPA, transcripts, financial-aid amounts, or other official records; if asked for those, say the demo does not hold real records and point them to the Registrar.
+- Plain text only. No markdown headers or tables.`;
+}
+
+async function tryModel(model, q){
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(AI_KEY);
+  const body = {
+    systemInstruction: { parts: [{ text: aiContext() }] },
+    contents: AI_HISTORY.concat([{ role:'user', parts:[{ text:q }] }]),
+    generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
+  };
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if(!res.ok){
+    let detail = 'HTTP ' + res.status;
+    try { const j = await res.json(); if(j.error && j.error.message) detail = j.error.message; } catch(e){}
+    if(res.status === 400 && /API.?key/i.test(detail)) detail = 'invalid API key';
+    if(res.status === 429) detail = 'rate limit reached — try again in a moment';
+    const err = new Error(detail);
+    /* model missing / retired / not enabled for this key → worth trying the next one */
+    err.tryNext = res.status === 404 || /no longer available|not found|not supported|does not exist/i.test(detail);
+    throw err;
+  }
+  const data = await res.json();
+  const cand = data.candidates && data.candidates[0];
+  const text = cand && cand.content && cand.content.parts
+    ? cand.content.parts.map(p=>p.text||'').join('').trim() : '';
+  if(!text) throw new Error('empty response');
+  return text;
+}
+async function callGemini(q){
+  const order = [AI_MODEL].concat(AI_MODELS.filter(m=>m!==AI_MODEL));
+  let lastErr;
+  for(const m of order){
+    try{
+      const text = await tryModel(m, q);
+      if(m !== AI_MODEL){
+        AI_MODEL = m;
+        try { localStorage.setItem('cc_gemini_model', m); } catch(e){}
+        updateAiSub();
+      }
+      return text;
+    }catch(err){
+      lastErr = err;
+      if(!err.tryNext) throw err;   /* bad key, rate limit, network → stop trying */
+    }
+  }
+  throw lastErr || new Error('no available model');
+}
+
+/* ---------- Dashboard ---------- */
+function renderDash(){
+  if(!state.user) return;
+  const now = new Date();
+  const h = now.getHours();
+  const greetW = h<12 ? 'Good morning' : h<18 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('dashDate').textContent = now.toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric'}).toUpperCase();
+  document.getElementById('dashGreet').textContent = greetW + ', ' + state.user.name.split(' ')[0] + '.';
+  const wl = state.myCourses.filter(x=>x.status==='Waitlisted').length;
+  const p1 = state.myAppts.length ? 'You have ' + state.myAppts.length + ' appointment' + (state.myAppts.length>1?'s':'') + ' confirmed' : 'Your day is clear';
+  const p2 = state.rsvps.size ? state.rsvps.size + ' saved event' + (state.rsvps.size>1?'s are':' is') + ' coming up' : 'no events saved yet';
+  const p3 = wl ? wl + ' course' + (wl>1?'s':'') + ' waitlisted' : 'registration has no conflicts';
+  document.getElementById('dashSummary').textContent = p1 + '. ' + p2.charAt(0).toUpperCase() + p2.slice(1) + ', and ' + p3 + '.';
+  const steps = [];
+  if(state.myCourses.length){ const c = COURSES.find(k=>k.id===state.myCourses[0].id); steps.push(['Review class plan', c.code + ' · ' + myCredits() + ' credits registered', 'reg']); }
+  else steps.push(['Register for classes', 'The Fall 2026 catalog is open', 'reg']);
+  if(state.rsvps.size){ const e = EVENTS.find(k=>k.id===[...state.rsvps][0]); steps.push([e.t, e.loc + ' · ' + e.d, e.c==='Career' ? 'careers' : 'events']); }
+  else steps.push(['Save an event', 'Browse the event directory', 'events']);
+  if(state.myAppts.length){ const a = state.myAppts[0]; steps.push([(TYPE_LABEL[a.type]||a.type) + ' · ' + a.w, a.d + ' · ' + a.t, 'appts']); }
+  else steps.push(['Book an advisor', 'Academic & Career Advisor 1:1s available', 'appts']);
+  document.getElementById('glanceList').innerHTML = steps.map((s,i) =>
+    `<div class="step"><span class="num">0${i+1}</span><div class="sinfo"><b>${esc(s[0])}</b><span>${esc(s[1])}</span></div><a class="olink" onclick="navTo('${s[2]}')">Open</a></div>`).join('');
+  refreshStats();
+}
+function resetDemo(){
+  state.myCourses=[]; state.rsvps=new Set(); state.joined=new Set(); state.applied=new Set(); state.myAppts=[];
+  COURSES.forEach(c=>c.enr=c.enr0);
+  SLOTS.forEach(s=>s.booked=false);
+  resetRoleData();
+  const cl = document.getElementById('chatlog'); if(cl) cl.innerHTML='';
+  greeted = false;
+  navTo('home');
+}
+function tryAsk(q){ ask(q); }
+</script>
+<div id="profileModal" class="pmask hidden" onclick="if(event.target===this)closeProfile()">
+  <div class="pmodal">
+    <h2>My profile</h2>
+    <p class="psmall">Changes apply to this demo session. Photos stay on this device — never uploaded (FERPA-safe).</p>
+    <div class="pavrow">
+      <div class="tavatar big" id="pfAvatar">?</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <label class="btn small ghost" for="pfFile" style="display:inline-block;cursor:pointer">Upload photo</label>
+        <button class="btn small cancel" onclick="pfClearPhoto()">Remove</button>
+        <input type="file" id="pfFile" accept="image/*" style="display:none" onchange="pfPhoto(event)">
+      </div>
+    </div>
+    <label for="pfName">Display name</label><input id="pfName">
+    <label for="pfTitle">Title / major</label><input id="pfTitle">
+    <label for="pfEmail">Contact email</label><input id="pfEmail">
+    <label for="pfPhone">Phone (optional)</label><input id="pfPhone" placeholder="(555) 010-0000">
+    <div class="msg" id="pfMsg"></div>
+    <div class="pbtns">
+      <button class="btn small ghost" onclick="closeProfile()">Cancel</button>
+      <button class="btn small" onclick="saveProfile()">Save changes</button>
+    </div>
+  </div>
+</div>
+<!-- FLOATING AI ASSISTANT -->
+<button class="ailaunch hidden" id="aiLaunch" onclick="toggleAI()" title="Ask the campus assistant" aria-label="Open the campus assistant">
+  <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM7.5 11.5A1.5 1.5 0 1 1 9 10a1.5 1.5 0 0 1-1.5 1.5zm4.5 0A1.5 1.5 0 1 1 13.5 10 1.5 1.5 0 0 1 12 11.5zm4.5 0A1.5 1.5 0 1 1 18 10a1.5 1.5 0 0 1-1.5 1.5z"/></svg>
+  <span class="badge">AI</span>
+</button>
+<div class="aiback hidden" id="aiBack" onclick="closeAI()"></div>
+<div class="aipanel hidden" id="aiPanel">
+  <div class="aihead">
+    <div class="ttl"><b>Campus Assistant</b><small id="aiSub">Ask anything — powered by Gemini</small></div>
+    <button onclick="openKeyPanel()" title="API settings">&#9881;</button>
+    <button onclick="toggleAI()" title="Close">&times;</button>
+  </div>
+  <div class="aikey hidden" id="aiKeyBox">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <b style="flex:1;margin:0;font-size:.9rem">Assistant settings</b>
+      <button class="btn small ghost" style="margin:0;padding:5px 12px" onclick="closeKeyPanel()">Done</button>
+    </div>
+    <b>Connect Google Gemini</b>
+    <span id="aiKeySrc" style="display:block;margin-bottom:6px;font-weight:600;color:var(--navy)"></span>
+    Paste a Gemini API key to unlock open-ended answers. Without a key the assistant still replies from the built-in campus knowledge base.
+    <input id="aiKeyIn" type="password" placeholder="AIza…" autocomplete="off" spellcheck="false" style="font-size:16px">
+    <label for="aiModelSel" style="display:block;margin-top:10px;font-size:.72rem;font-weight:700;color:var(--navy)">Model</label>
+    <select id="aiModelSel" onchange="pickModel(this.value)" style="margin-top:4px;font-size:16px;padding:9px 11px"></select>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn small" style="margin:0" onclick="saveKey()">Save key</button>
+      <button class="btn small ghost" style="margin:0" onclick="clearKey()">Remove key</button>
+      <button class="btn small ghost" style="margin:0" onclick="closeKeyPanel()">Close</button>
+    </div>
+    <span class="warn">Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. The key is stored only in this browser — never commit it to a public GitHub repository.</span>
+  </div>
+  <div class="aibody" id="chatlog"></div>
+  <div class="aichips" id="aiChips"></div>
+  <div class="aifoot">
+    <input id="chatIn" placeholder="Ask me anything…" onkeydown="if(event.key==='Enter')send()">
+    <button class="aisend" id="aiSendBtn" onclick="send()" aria-label="Send">&#10148;</button>
+  </div>
+  <div class="aimodel" id="aiModelNote"></div>
+</div>
+</body>
+</html>
