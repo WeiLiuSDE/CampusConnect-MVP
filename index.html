@@ -302,6 +302,29 @@
   .pipe{align-items:stretch}
   .pipestep{display:flex;flex-direction:column;height:100%}
   @media(max-width:520px){ .ccard h3,.club h3,.job h3,.event h3{min-height:0} }
+  /* ---------- executive traffic-light dashboard ---------- */
+  .rag{display:inline-flex;align-items:center;gap:7px;border-radius:99px;padding:6px 15px;font-size:.74rem;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
+  .rag .lamp{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+  .rag.green{background:var(--ok-bg);color:var(--ok)} .rag.green .lamp{background:var(--ok)}
+  .rag.yellow{background:#FFF2CE;color:#8A6400} .rag.yellow .lamp{background:#E0A200}
+  .rag.red{background:var(--err-bg);color:var(--err)} .rag.red .lamp{background:var(--err)}
+  .ragrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .ragrow h2{margin:0}
+  .raggrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;align-items:stretch}
+  .ragcard{background:#fff;border:1.6px solid #E7ECFA;border-left-width:5px;border-radius:14px;padding:15px 16px;display:flex;flex-direction:column;gap:7px;height:100%}
+  .ragcard.green{border-left-color:var(--ok)} .ragcard.yellow{border-left-color:#E0A200} .ragcard.red{border-left-color:var(--err)}
+  .ragcard .dim{font-size:.66rem;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted)}
+  .ragcard ul{margin:0;padding-left:16px} .ragcard li{font-size:.79rem;color:var(--ink);line-height:1.5;margin-bottom:3px}
+  .ragcard .why{font-size:.72rem;color:var(--muted);margin-top:auto;padding-top:6px;border-top:1px dashed #E7ECFA}
+  .threecol{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;align-items:stretch}
+  .colbox{background:#F5F7FB;border-radius:14px;padding:16px;height:100%}
+  .colbox b.hd{display:block;font-size:.68rem;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:var(--navy);margin-bottom:9px}
+  .colbox ul{margin:0;padding-left:16px} .colbox li{font-size:.82rem;line-height:1.55;margin-bottom:6px;color:var(--ink)}
+  .adopt{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:4px}
+  .adoptcell{background:#fff;border:1.6px solid #E7ECFA;border-radius:13px;padding:13px 14px}
+  .adoptcell .lab{font-size:.63rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+  .adoptcell .nowv{font-size:1.25rem;font-weight:800;color:var(--ink);display:block;margin:5px 0 2px;letter-spacing:-.4px}
+  .adoptcell .tgt{font-size:.72rem;color:var(--muted)}
   .hidden{display:none!important}
   footer{text-align:center;color:var(--muted);font-size:.75rem;padding:26px 16px;line-height:1.7}
   section{animation:fadein .35s ease}
@@ -906,10 +929,24 @@
 
   <!-- EXECUTIVE DASHBOARD (Sponsor) -->
   <section id="view-exec" class="hidden">
-    <div class="phero"><div><span class="eyebrow">Executive Sponsor</span><h1>Board demo, on track.</h1><p class="psub">The numbers you will take into the Board of Trustees meeting — budget, adoption, NPS movement, and demo readiness.</p></div></div>
+    <div class="phero"><div><span class="eyebrow">Executive Sponsor · Board of Trustees update</span><h1>CampusConnect: status at a glance.</h1><p class="psub">Three-minute traffic-light briefing for Dr. Susan Walker — scope, schedule, budget, quality and risk, with the evidence behind student adoption.</p></div></div>
+    <div class="card">
+      <div class="ragrow"><h2 class="dh2" style="flex:1">Overall project status</h2><span class="rag yellow" id="overallRag"><span class="lamp"></span>Yellow — on track with watch items</span></div>
+      <div class="raggrid" id="ragGrid"></div>
+    </div>
     <div class="dstats" id="execKpis"></div>
+    <div class="card">
+      <span class="eyebrow">Board question · "How do we know students will actually use this platform?"</span>
+      <h2 class="dh2">Adoption evidence</h2>
+      <div class="adopt" id="adoptGrid"></div>
+      <p class="sub" style="margin-top:12px" id="adoptNote"></p>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Weekly status</span>
+      <h2 class="dh2">Accomplishments · Upcoming · Decisions needed</h2>
+      <div class="threecol" id="execDigest"></div>
+    </div>
     <div class="card"><span class="eyebrow">Demo readiness</span><h2 class="dh2">What the Board will see working</h2><div id="execChecklist"></div></div>
-    <div class="card"><span class="eyebrow">Weekly status</span><h2 class="dh2">This week's digest</h2><div id="execDigest"></div></div>
   </section>
 
   <!-- IT GOVERNANCE (IT Director) -->
@@ -1785,33 +1822,90 @@ function toggleClubActive(id){
 
 /* --- Executive dashboard (Sponsor) --- */
 function renderExec(){
+  /* Traffic-light ratings — GE-style dashboard (class deck p.17).
+     Baseline reflects the Event A decision: $4,000 budget, 6-week schedule, 63 of 85 story points. */
+  const RAG = [
+    {dim:'Scope', rag:'yellow', bullets:[
+      '63 of 85 story points delivered as agreed — 22 points moved to Phase 2.',
+      'Every Must-Have still works end to end in the demo.'],
+     why:'Yellow: sponsor pressure to add social features mid-sprint. Scope frozen Day 32.'},
+    {dim:'Schedule', rag:'yellow', bullets:[
+      'Sprint 3 of 3 complete; Day 46 of the compressed 6-week plan.',
+      'Security review pulled forward to Week 2, off the critical path.'],
+     why:'Yellow: two weeks were removed from the plan; no float remains before the Board demo.'},
+    {dim:'Budget', rag:'green', bullets:[
+      '$1,840 spent of the revised $4,000 baseline (46%).',
+      '$1,000 returned to the university; $600 contingency intact.'],
+     why:'Green: burn rate tracks plan; no change request raised to date.'},
+    {dim:'Quality', rag:'yellow', bullets:[
+      'UAT reduced from 3 rounds to 2; 24 of 24 prompt-injection tests passed.',
+      'Human-in-the-loop review mandatory before every staging promotion.'],
+     why:'Yellow: one fewer UAT round leaves less room to absorb late defects.'},
+    {dim:'Risk', rag:'red', bullets:[
+      'R1 AI hallucination — critical severity; grounded answers plus source links.',
+      'No management reserve for a genuine surprise (Event A removed the cushion).'],
+     why:'Red: kill-switch to static FAQ mode is tested; Dr. Walker releases $250 if we run 10% over.'}
+  ];
+  document.getElementById('ragGrid').innerHTML = RAG.map(r=>`
+    <div class="ragcard ${r.rag}">
+      <span class="dim">${r.dim}</span>
+      <span class="rag ${r.rag}"><span class="lamp"></span>${r.rag}</span>
+      <ul>${r.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>
+      <span class="why">${esc(r.why)}</span>
+    </div>`).join('');
+
   const kpis = [
-    ['Budget consumed','$1,840','of $5,000 committed · 36.8%',37,''],
-    ['Board demo','14 days','away · day 46 of 60',77,'gold'],
-    ['Pilot testers','40','target met · $46 per tester',100,''],
-    ['Student NPS','+21 pts','baseline 31 → 52 · target +20 met',100,'gold']
+    ['Budget consumed','$1,840','of the $4,000 revised baseline · 46%',46,''],
+    ['Board demo','Day 46 of 60','2-week compressed plan holding',77,'gold'],
+    ['Scope delivered','63 / 85 pts','22 points re-planned to Phase 2',74,''],
+    ['Forecast ROI','292%','$15,700 est. annual benefit · payback 3.1 months',100,'gold']
   ];
   document.getElementById('execKpis').innerHTML = kpis.map(k=>
     `<div class="dstat" style="cursor:default"><span class="eyebrow">${k[0]}</span><b>${k[1]}</b><span class="dsub">${k[2]}</span><div class="kpibar"><i class="${k[4]}" style="width:${k[3]}%"></i></div></div>`).join('');
+
+  /* Adoption evidence — the Board's "will students use it?" question, answered with measured pilot data */
+  const ADOPT = [
+    ['Pilot activation','82%','410 of 500 pilot students logged in · target 30%'],
+    ['Task completion','2.1 min','find an event + book advising · was 6.5 min'],
+    ['Weekly return rate','61%','pilot students returning in week 2'],
+    ['AI answers that stick','44%','resolved without contacting staff · target 40%'],
+    ['Satisfaction','4.2 / 5','post-use survey · baseline 2.8'],
+    ['Event RSVPs','27%','view-to-RSVP conversion · was 8%']
+  ];
+  document.getElementById('adoptGrid').innerHTML = ADOPT.map(a=>`
+    <div class="adoptcell"><span class="lab">${a[0]}</span><span class="nowv">${a[1]}</span><span class="tgt">${esc(a[2])}</span></div>`).join('');
+  document.getElementById('adoptNote').textContent =
+    'Measured with 500 pilot students from two dorms and three clubs over two weeks, against a Week-0 baseline taken on the old portals. Adoption is a tracked risk (R7), owned by the Student Government President, with student ambassadors and a $150 incentive pool funding the next measurement wave.';
+
+  const digest = [
+    ['Accomplishments', [
+      'Sprint 3 closed at 21 of 21 planned story points.',
+      'Advisor-confirmed booking flow shipped — advisors control their own open blocks.',
+      'Security review passed with zero FERPA findings; PII masking at 100%.',
+      'Pilot with 500 students returned 82% activation.']],
+    ['Upcoming activities', [
+      'Sprint 4: mobile-responsive pass and club directory polish.',
+      'Second UAT round and full dress rehearsal of the Board demo.',
+      'Grant report on adoption metrics and the Phase 2 funding request.']],
+    ['Decisions needed', [
+      'Approve the three user journeys to feature live in the Board demo.',
+      'Confirm Phase 2 intent for the 22 deferred story points (scheduler, marketplace).',
+      'Release of the $250 contingency if velocity drops below 21 points.']]
+  ];
+  document.getElementById('execDigest').innerHTML = digest.map(d=>`
+    <div class="colbox"><b class="hd">${d[0]}</b><ul>${d[1].map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('');
+
   const feats = [
     ['ok','Unified login & student dashboard','live in the demo build'],
     ['ok','Class registration with live seat counts','live in the demo build'],
     ['ok','Event directory + RSVP','live in the demo build'],
     ['ok','Appointment booking with advisor confirmation','live in the demo build'],
-    ['ok','Grounded AI assistant','answers from approved FAQs only'],
+    ['ok','AI campus assistant with source links','human-in-the-loop verified'],
     ['warn','Mobile-responsive pass','Sprint 4 — in progress'],
     ['warn','Club directory polish','Sprint 4 — in progress']
   ];
   document.getElementById('execChecklist').innerHTML = feats.map(f=>
     `<div class="checkrow"><span class="ckdot ${f[0]}">${f[0]==='ok'?'✓':'…'}</span><div style="font-size:.9rem"><b>${f[1]}</b> <span style="color:var(--muted)">— ${f[2]}</span></div></div>`).join('');
-  const digest = [
-    ['Accomplishments','Sprint 3 closed at 30 of 30 story points; advisor-confirmed booking flow shipped; security review passed with no findings.'],
-    ['Upcoming','Mobile-responsive pass and club directory polish (Sprint 4); full dress rehearsal of the Board demo next Friday.'],
-    ['Risks','Timeline remains the top risk — mitigated by a frozen MVP scope. No budget risk: 36.8% consumed at day 46.'],
-    ['Decisions needed','Confirm which three user journeys you want featured live in the Board demo.']
-  ];
-  document.getElementById('execDigest').innerHTML = digest.map(d=>
-    `<div class="checkrow"><div style="font-size:.9rem"><b>${d[0]}.</b> <span style="color:var(--muted)">${d[1]}</span></div></div>`).join('');
 }
 
 /* --- IT governance (IT Director) --- */
