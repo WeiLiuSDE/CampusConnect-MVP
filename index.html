@@ -1834,9 +1834,9 @@ function renderExec(){
       'Security review pulled forward to Week 2, off the critical path.'],
      why:'Yellow: two weeks were removed from the plan; no float remains before the Board demo.'},
     {dim:'Budget', rag:'green', bullets:[
-      '$1,840 spent of the revised $4,000 baseline (46%).',
+      '$3,480 spent of the revised $4,000 baseline (87%).',
       '$1,000 returned to the university; $600 contingency intact.'],
-     why:'Green: burn rate tracks plan; no change request raised to date.'},
+     why:'Green: burn tracks plan within the $600 contingency; no change request raised.'},
     {dim:'Quality', rag:'yellow', bullets:[
       'UAT reduced from 3 rounds to 2; 24 of 24 prompt-injection tests passed.',
       'Human-in-the-loop review mandatory before every staging promotion.'],
@@ -1855,7 +1855,7 @@ function renderExec(){
     </div>`).join('');
 
   const kpis = [
-    ['Budget consumed','$1,840','of the $4,000 revised baseline · 46%',46,''],
+    ['Budget consumed','$3,480','of the $4,000 revised baseline · 87%',87,''],
     ['Board demo','Day 46 of 60','2-week compressed plan holding',77,'gold'],
     ['Scope delivered','63 / 85 pts','22 points re-planned to Phase 2',74,''],
     ['Forecast ROI','292%','$15,700 est. annual benefit · payback 3.1 months',100,'gold']
@@ -2033,21 +2033,21 @@ function removeBlock(id){ ADV_BLOCKS = ADV_BLOCKS.filter(b=>b.id!==id); renderAd
 
 /* --- Budget & ROI (CFO) --- */
 const BURN = [
-  ['Week 1','AI development tooling & licenses',420],
-  ['Week 2','Sandbox hosting & environments',310],
-  ['Week 3','Usability-testing incentives (40 pilot students)',265],
-  ['Week 4','Security & penetration scan tooling',335],
-  ['Week 5','Hosting, monitoring & backups',290],
-  ['Week 6','Board demo preparation materials',220]
+  ['Week 1','AI development tooling & licences',480],
+  ['Week 2','Sandbox hosting & environments',620],
+  ['Week 3','Usability-testing incentives (500 pilot students)',545],
+  ['Week 4','Security & penetration scan tooling',610],
+  ['Week 5','Hosting, monitoring & backups',585],
+  ['Week 6','Board demo preparation & UAT round 2',640]
 ];
 function renderBudget(){
   const spent = BURN.reduce((n,b)=>n+b[2],0);
   const avg = Math.round(spent/BURN.length);
   const kpis = [
-    ['Committed budget','$5,000','fixed — no increase requested',100,'gold'],
-    ['Spent to date','$'+spent.toLocaleString(), (spent/5000*100).toFixed(1)+'% consumed at day 46', Math.round(spent/5000*100),''],
-    ['Avg weekly burn','$'+avg,'trending flat week over week',Math.round(avg/833*100),''],
-    ['Forecast at launch','$2,760','44.8% under budget',55,'gold']
+    ['Revised baseline','$4,000','after Event A · $1,000 returned to the university',100,'gold'],
+    ['Spent to date','$'+spent.toLocaleString(), (spent/4000*100).toFixed(1)+'% consumed at day 46', Math.round(spent/4000*100),''],
+    ['Avg weekly burn','$'+avg,'trending flat week over week',Math.round(avg/667*100),''],
+    ['Forecast at launch','$3,860','3.5% under the $4,000 baseline',97,'gold']
   ];
   document.getElementById('cfoKpis').innerHTML = kpis.map(k=>
     `<div class="dstat" style="cursor:default"><span class="eyebrow">${k[0]}</span><b>${k[1]}</b><span class="dsub">${k[2]}</span><div class="kpibar"><i class="${k[4]}" style="width:${k[3]}%"></i></div></div>`).join('');
@@ -2060,7 +2060,7 @@ function renderBudget(){
   const roi = [
     'Faculty scheduling admin reduced by an estimated 120 hours per semester (≈ $4,800/yr in staff time)',
     'Student NPS up 21 points (baseline 31 → 52) — engagement supports retention and enrollment',
-    '40 pilot testers onboarded at $46 per tester — acquisition target met',
+    '500 pilot students onboarded at about $7 per tester — acquisition target met',
     'AI assistant deflects 63% of routine FAQ traffic away from staff inboxes'
   ];
   document.getElementById('roiList').innerHTML = roi.map(s=>`<div class="checkrow"><span class="ckdot ok">✓</span><div style="font-size:.9rem">${s}</div></div>`).join('');
